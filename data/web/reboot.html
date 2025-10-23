@@ -1,0 +1,30 @@
+
+<!DOCTYPE HTML>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+<h3>
+  Weiterleitung zur Login-Seite in <span id="countdown">5</span> Sekunden…
+</h3>
+<script>
+  var seconds = 5;
+  function countdown() {
+    seconds--;
+    if (seconds < 0) {
+      window.location = "login.html";
+    } else {
+      document.getElementById("countdown").innerText = seconds;
+      setTimeout(countdown, 1000);
+    }
+  }
+  countdown();
+</script>
+
+</body>
+
+</html>
+

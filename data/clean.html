@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html data-bs-theme="light" lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>GM CB</title>
+    <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i&amp;display=swap">
+    <link rel="stylesheet" href="assets/fonts/fontawesome-all.min.css">
+    <link rel="stylesheet" href="assets/css/bs-theme-overrides.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous"/>
+</head>
+
+<body id="page-top">
+    <div id="wrapper">
+        <nav class="navbar align-items-start sidebar sidebar-dark accordion bg-gradient-primary p-0 navbar-dark p-0 toggled" style="background: var(--bs-primary-text-emphasis);">
+            <div class="container-fluid d-flex flex-column p-0"><a class="navbar-brand d-flex justify-content-center align-items-center sidebar-brand m-0" href="#" style="font-size: 10px;">
+                    <div class="sidebar-brand-text mx-3"><span>GM Flow 8</span></div>
+                </a>
+                <hr class="sidebar-divider my-0">
+                <ul class="navbar-nav text-light" id="accordionSidebar">
+                    <li class="nav-item"><a class="nav-link" href="/"><i class="far fa-compass" style="font-size: 14px;"></i><span>Durchfluss</span></a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/clean.html"><i class="far fa-circle" style="font-size: 15px;"></i><span>Reinigung</span></a></li>
+                    <li class="nav-item"></li>
+                </ul>
+                <div class="text-center d-none d-md-inline"><button class="btn rounded-circle border-0" id="sidebarToggle" type="button"></button></div>
+            </div>
+        </nav>
+        <div class="d-flex flex-column" id="content-wrapper">
+            <div id="content">
+                <nav class="navbar navbar-expand bg-white shadow mb-4 topbar">
+                    <div class="container-fluid"><button class="btn btn-link d-md-none rounded-circle me-3" id="sidebarToggleTop" type="button"><i class="fas fa-bars"></i></button>
+                        <form class="d-none d-sm-inline-block me-auto ms-md-3 my-2 my-md-0 mw-100 navbar-search">
+                            <div class="input-group"></div>
+                        </form>
+                    </div>
+                </nav>
+                <div class="container-fluid" style="margin: 0px;padding-top: 0px;">
+                    <h3 class="text-dark mb-4">Reinigung&nbsp;</h3>
+                    <div class="card">
+                        <div class="card-header py-3">
+                            <p class="m-0 fw-bold" style="color: var(--bs-primary);font-size: 21px;">%NAMECH1%</p>
+                        </div>
+                        <div class="card-body" style="margin: 0px;">
+                            <h4 class="card-title" style="color: var(--bs-primary-text-emphasis);font-size: 16.4px;">letzte Reinigung</h4>
+                            <p class="card-text h1" style="font-size: 25px;">%LASTCLEAN1%</p>
+                            <h4 class="card-title" style="color: var(--bs-primary-text-emphasis);font-size: 16.4px;">nächste Reinigung fällig</h4>
+                            <p class="card-text h1" id="nextClean1" style="font-size: 25px;">%NEXTCLEAN1%</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="container-fluid" style="margin: 0px;padding-top: 0px;">
+                    <div class="card">
+                        <div class="card-header py-3">
+                            <p class="m-0 fw-bold" style="color: var(--bs-primary);font-size: 21px;">%NAMECH2%</p>
+                        </div>
+                        <div class="card-body" style="margin: 0px;">
+                            <h4 class="card-title" style="color: var(--bs-primary-text-emphasis);font-size: 16.4px;">letzte Reinigung</h4>
+                            <p class="card-text h1" style="font-size: 25px;">%LASTCLEAN2%</p>
+                            <h4 class="card-title" style="color: var(--bs-primary-text-emphasis);font-size: 16.4px;">nächste Reinigung fällig</h4>
+                            <p class="card-text h1" id="nextClean1-1" style="font-size: 25px;">%NEXTCLEAN2%</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="container-fluid" style="margin: 0px;padding-top: 0px;">
+                    <div class="card">
+                        <div class="card-header py-3">
+                            <p class="m-0 fw-bold" style="color: var(--bs-primary);font-size: 21px;">%NAMECH3%</p>
+                        </div>
+                        <div class="card-body" style="margin: 0px;">
+                            <h4 class="card-title" style="color: var(--bs-primary-text-emphasis);font-size: 16.4px;">letzte Reinigung</h4>
+                            <p class="card-text h1" style="font-size: 25px;">%LASTCLEAN3%</p>
+                            <h4 class="card-title" style="color: var(--bs-primary-text-emphasis);font-size: 16.4px;">nächste Reinigung fällig</h4>
+                            <p class="card-text h1" id="nextClean1-3" style="font-size: 25px;">%NEXTCLEAN3%</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="container-fluid" style="margin: 0px;padding-top: 0px;">
+                    <div class="card">
+                        <div class="card-header py-3">
+                            <p class="m-0 fw-bold" style="color: var(--bs-primary);font-size: 21px;">%NAMECH4%</p>
+                        </div>
+                        <div class="card-body" style="margin: 0px;">
+                            <h4 class="card-title" style="color: var(--bs-primary-text-emphasis);font-size: 16.4px;">letzte Reinigung</h4>
+                            <p class="card-text h1" style="font-size: 25px;">%LASTCLEAN4%</p>
+                            <h4 class="card-title" style="color: var(--bs-primary-text-emphasis);font-size: 16.4px;">nächste Reinigung fällig</h4>
+                            <p class="card-text h1" id="nextClean1-2" style="font-size: 25px;">%NEXTCLEAN4%</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="container-fluid" style="margin: 0px;padding-top: 0px;">
+                    <div class="card">
+                        <div class="card-header py-3">
+                            <p class="m-0 fw-bold" style="color: var(--bs-primary);font-size: 21px;">%NAMECH5%</p>
+                        </div>
+                        <div class="card-body" style="margin: 0px;">
+                            <h4 class="card-title" style="color: var(--bs-primary-text-emphasis);font-size: 16.4px;">letzte Reinigung</h4>
+                            <p class="card-text h1" style="font-size: 25px;">%LASTCLEAN5%</p>
+                            <h4 class="card-title" style="color: var(--bs-primary-text-emphasis);font-size: 16.4px;">nächste Reinigung fällig</h4>
+                            <p class="card-text h1" id="nextClean1-4" style="font-size: 25px;">%NEXTCLEAN5%</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="container-fluid" style="margin: 0px;padding-top: 0px;">
+                    <div class="card">
+                        <div class="card-header py-3">
+                            <p class="m-0 fw-bold" style="color: var(--bs-primary);font-size: 21px;">%NAMECH6%</p>
+                        </div>
+                        <div class="card-body" style="margin: 0px;">
+                            <h4 class="card-title" style="color: var(--bs-primary-text-emphasis);font-size: 16.4px;">letzte Reinigung</h4>
+                            <p class="card-text h1" style="font-size: 25px;">%LASTCLEAN6%</p>
+                            <h4 class="card-title" style="color: var(--bs-primary-text-emphasis);font-size: 16.4px;">nächste Reinigung fällig</h4>
+                            <p class="card-text h1" id="nextClean1-5" style="font-size: 25px;">%NEXTCLEAN6%</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="container-fluid" style="margin: 0px;padding-top: 0px;">
+                    <div class="card">
+                        <div class="card-header py-3">
+                            <p class="m-0 fw-bold" style="color: var(--bs-primary);font-size: 21px;">%NAMECH7%</p>
+                        </div>
+                        <div class="card-body" style="margin: 0px;">
+                            <h4 class="card-title" style="color: var(--bs-primary-text-emphasis);font-size: 16.4px;">letzte Reinigung</h4>
+                            <p class="card-text h1" style="font-size: 25px;">%LASTCLEAN7%</p>
+                            <h4 class="card-title" style="color: var(--bs-primary-text-emphasis);font-size: 16.4px;">nächste Reinigung fällig</h4>
+                            <p class="card-text h1" id="nextClean1-6" style="font-size: 25px;">%NEXTCLEAN7%</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="container-fluid" style="margin: 0px;padding-top: 0px;">
+                    <div class="card">
+                        <div class="card-header py-3">
+                            <p class="m-0 fw-bold" style="color: var(--bs-primary);font-size: 21px;">%NAMECH8%</p>
+                        </div>
+                        <div class="card-body" style="margin: 0px;">
+                            <h4 class="card-title" style="color: var(--bs-primary-text-emphasis);font-size: 16.4px;">letzte Reinigung</h4>
+                            <p class="card-text h1" style="font-size: 25px;">%LASTCLEAN8%</p>
+                            <h4 class="card-title" style="color: var(--bs-primary-text-emphasis);font-size: 16.4px;">nächste Reinigung fällig</h4>
+                            <p class="card-text h1" id="nextClean1-7" style="font-size: 25px;">%NEXTCLEAN8%</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <footer class="bg-white sticky-footer" style="width: 100%;text-align: left;margin: 0px;margin-top: 29px;">
+                <div class="container my-auto">
+                    <div class="text-center my-auto copyright"><span style="font-size: 9.8px;">© GASTROMATIX GmbH &amp; Co KG 2024</span></div>
+                </div>
+            </footer>
+        </div><a class="border rounded d-inline scroll-to-top" href="#page-top"><i class="fas fa-angle-up"></i></a>
+    </div>
+    <script src="assets/bootstrap/js/bootstrap.min.js"></script>
+    <script src="assets/js/auswertung.js"></script>
+    <script src="assets/js/index.js"></script>
+    <script src="assets/js/theme.js"></script>
+</body>
+
+</html>

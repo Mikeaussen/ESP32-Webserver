@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html data-bs-theme="light" lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>GM CB</title>
+    <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i&amp;display=swap">
+    <link rel="stylesheet" href="assets/fonts/fontawesome-all.min.css">
+    <link rel="stylesheet" href="assets/fonts/font-awesome.min.css">
+    <link rel="stylesheet" href="assets/fonts/fontawesome5-overrides.min.css">
+    <link rel="stylesheet" href="assets/css/bs-theme-overrides.css">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous"/>
+</head>
+
+<body id="page-top">
+    <div id="wrapper">
+        <nav class="navbar align-items-start sidebar sidebar-dark accordion bg-gradient-primary p-0 navbar-dark p-0 toggled" style="background: var(--bs-primary-text-emphasis);">
+            <div class="container-fluid d-flex flex-column p-0"><a class="navbar-brand d-flex justify-content-center align-items-center sidebar-brand m-0" href="#" style="font-size: 10px;">Gastromatix<div class="sidebar-brand-text mx-3"><span>GM Flow 8</span></div></a>
+                <ul class="navbar-nav text-light" id="accordionSidebar">
+                    <li class="nav-item"><a class="nav-link" href="/dashboard.html"><i class="far fa-list-alt" style="font-size: 15px;"></i><span>Dashboard</span></a><a class="nav-link" href="/"><i class="far fa-sun" style="font-size: 15px;"></i><span>System</span></a></li>
+                    <li class="nav-item">
+                        <div><a class="btn btn-link nav-link" data-bs-toggle="collapse" aria-expanded="false" aria-controls="collapse-4" href="#collapse-4" role="button"><i class="fas fa-file"></i>&nbsp;<span>Dateien</span></a>
+                            <div class="collapse" id="collapse-4">
+                                <div class="bg-white border rounded py-2 collapse-inner"><a class="collapse-item" onclick="listFilesButtonRezepte()" href="/files.html">Rezepte</a><a class="collapse-item" onclick="listFilesButtonProducts()">Produkte</a><a class="collapse-item" onclick="listFilesButtonReports()">Auswertung</a></div>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+                <div class="text-center d-none d-md-inline"><button class="btn rounded-circle border-0" id="sidebarToggle" type="button"></button></div>
+            </div>
+        </nav>
+        <div class="d-flex flex-column" id="content-wrapper">
+            <div id="content">
+                <div class="container-fluid" style="margin: 0px;padding-top: 0px;">
+                    <h3 class="text-dark mb-4" style="margin-top: 20px;">Dateien</h3>
+                    <div class="card">
+                        <div class="card-header py-3">
+                            <p id="status"></p>
+                            <p id="detailsheader" class="m-0 fw-bold col-sm" style="color: var(--bs-primary);font-size: 21px;">----</p>
+                        </div>
+                        <div class="card-body"></div>
+                        <p id="details"></p>
+                        <p><a class="btn btn-primary btn-circle" role="button" onclick="showUploadButtonFancy()" style="background: var(--bs-btn-border-color);padding: 7px 12px 6px 13px;padding-left: 10px;margin: 0px;margin-left: 20px;padding-right: 11px;padding-top: 5px;"><i class="fa fa-plus text-white"></i></a></p>
+                    </div>
+                </div>
+                <div class="container-fluid" style="margin: 0px;padding-top: 0px;">
+                    <div class="card"></div>
+                </div>
+                <div class="container-fluid" style="margin: 0px;padding-top: 0px;">
+                    <div class="card"></div>
+                </div>
+            </div>
+            <footer class="bg-white sticky-footer" style="width: 100%;text-align: left;margin: 0px;margin-top: 29px;">
+                <div class="container my-auto">
+                    <div class="text-center my-auto copyright"><span style="font-size: 9.8px;">© GASTROMATIX GmbH &amp; Co KG 2024</span></div>
+                </div>
+            </footer>
+        </div><a class="border rounded d-inline scroll-to-top" href="#page-top"><i class="fas fa-angle-up"></i></a>
+    </div>
+    <script src="assets/bootstrap/js/bootstrap.min.js"></script>
+    <script src="assets/js/auswertung.js"></script>
+    <script src="assets/js/index.js"></script>
+    <script src="assets/js/theme.js"></script>
+</body>
+
+</html>

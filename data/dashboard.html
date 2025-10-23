@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html data-bs-theme="light" lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>GM Dashboard</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i&amp;display=swap">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous"/>
+</head>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      padding-left: 0%;
+      background-color: #231E45;
+    }
+
+    h2 {
+      margin-bottom: 15px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 15px;
+    }
+
+    .card {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 15px;
+      background: #f9f9f9;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card img {
+      width: 50px;
+      height: 50px;
+    }
+
+    .info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .info h3 {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    .info p {
+      margin: 2px 0;
+      font-size: 14px;
+      color: #555;
+    }
+  </style>
+
+<body>
+  <h2 style="color: white;">Pumpable ingredients</h2>
+  <div class="grid" id="ingredients-grid">
+    <!-- Karten werden per JS generiert -->
+  </div>
+
+  <script>
+    const ingredients = [
+      { name: "Absolut Vodka", amount: "40 ml left", alcohol: "3000% alcohol", image: "https://www.thecocktaildb.com/images/ingredients/Vodka.png"},
+      { name: "Cranberry Juice", amount: "0 ml left", alcohol: "3000% alcohol", image: "https://www.thecocktaildb.com/images/ingredients/Vodka.png"},
+      { name: "Grenadine Syrup", amount: "0 ml left", alcohol: "3000% alcohol", image: "https://www.thecocktaildb.com/images/ingredients/Vodka.png"},
+      { name: "Orange Juice", amount: "0 ml left", alcohol: "3000% alcohol", image: "web/pictures/Geschmackssorten/orange.png"},
+      { name: "Pineapple Juice", amount: "0 ml left", alcohol: "3000% alcohol", image: "https://www.thecocktaildb.com/images/ingredients/Vodka.png"},
+      { name: "Pineapple Juice2", amount: "0 ml left", alcohol: "3000% alcohol", image: "https://www.thecocktaildb.com/images/ingredients/Vodka.png"},
+      { name: "Pineapple Juice3", amount: "0 ml left", alcohol: "3000% alcohol", image: "https://www.thecocktaildb.com/images/ingredients/Vodka.png"},
+      { name: "Pineapple Juice4", amount: "0 ml left", alcohol: "3000% alcohol", image: "https://www.thecocktaildb.com/images/ingredients/Vodka.png"},
+    ];
+
+    const grid = document.getElementById("ingredients-grid");
+
+    for (let i = 0; i < ingredients.length; i++)
+    {
+      const card = document.createElement("div");
+      card.className = "card";
+
+      card.innerHTML = `
+        <img src="${ingredients[i].image}" alt="${ingredients[i].name}">
+        <div class="info">
+          <h3>${ingredients[i].name}</h3>
+          <p>${ingredients[i].amount}</p>
+          <p>${ingredients[i].alcohol}</p>
+        </div>
+      `;
+
+      grid.appendChild(card);
+    }
+  </script>
+</body>
+</html>
+
+<!--body id="page-top">
+    <div id="wrapper">
+        <nav class="navbar align-items-start sidebar sidebar-dark accordion bg-gradient-primary p-0 navbar-dark p-0 toggled" style="background: var(--bs-primary-text-emphasis);">
+            <div class="container-fluid d-flex flex-column p-0"><a class="navbar-brand d-flex justify-content-center align-items-center sidebar-brand m-0" href="#" style="font-size: 10px;">Gastromatix<div class="sidebar-brand-text mx-3"><span>GM Flow 8</span></div></a>
+                <ul class="navbar-nav text-light" id="accordionSidebar">
+                    <li class="nav-item"><a class="nav-link active" href="#"><i class="far fa-list-alt" style="font-size: 15px;"></i><span>Dashboard</span></a><a class="nav-link" href="/"><i class="far fa-sun" style="font-size: 15px;"></i><span>System</span></a></li>
+                    <li class="nav-item">
+                        <div><a class="btn btn-link nav-link" data-bs-toggle="collapse" aria-expanded="false" aria-controls="collapse-4" href="#collapse-4" role="button"><i class="fas fa-file"></i>&nbsp;<span>Dateien</span></a>
+                            <a href="login.html" class="btn btn-primary w-100 mt-2">Login</a>
+                            <a href="login2.php" class="btn btn-primary w-100 mt-2">Login-2</a>
+                            <div class="collapse" id="collapse-4">
+                                <div class="bg-white border rounded py-2 collapse-inner"><a class="collapse-item" onclick="listFilesButtonRezepte()" href="/files.html">Rezepte</a><a class="collapse-item" onclick="listFilesButtonProducts()">Produkte</a><a class="collapse-item" onclick="listFilesButtonReports()">Auswertung</a></div>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+                <div class="text-center d-none d-md-inline"><button class="btn rounded-circle border-0" id="sidebarToggle" type="button"></button></div>
+            </div>
+        </nav>
+        <div class="d-flex flex-column" id="content-wrapper">
+            <div id="content">
+                <div class="container-fluid" style="margin: 0px;padding-top: 0px;">
+                    <h3 class="text-dark mb-4" style="margin-top: 20px;">Dashboard</h3>
+                    <div class="card">
+                        <div class="card-header py-3">
+                            <p class="m-0 fw-bold col-sm" style="color: var(--bs-primary);font-size: 21px;">Auswertung</p>
+                            <div class="row">
+                                <div class="col-md-6 col-xl-3 mb-4">
+                                    <div class="card shadow border-left-primary py-2">
+                                        <div class="card-body">
+                                            <div class="row g-0 align-items-center">
+                                                <div class="col me-2">
+                                                    <div class="text-uppercase text-primary fw-bold text-xs mb-1"><span>Cocktails.</span></div>
+                                                    <div class="text-dark fw-bold h5 mb-0"><span class="fs-1" id="anzahlCocktails">0</span></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-xl-3 mb-4">
+                                    <div class="card shadow border-left-primary py-2">
+                                        <div class="card-body">
+                                            <div class="row g-0 align-items-center">
+                                                <div class="col me-2">
+                                                    <div class="text-uppercase text-primary fw-bold text-xs mb-1"><span>alkoholfrei</span></div>
+                                                    <div class="fs-1 text-dark fw-bold h5 mb-0"><span id="anzahlAlkoholfrei">0</span></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-xl-3 mb-4">
+                                    <div class="card shadow border-left-primary py-2">
+                                        <div class="card-body">
+                                            <div class="row g-0 align-items-center">
+                                                <div class="col me-2">
+                                                    <div class="text-uppercase text-primary fw-bold text-xs mb-1"><span>Longdrinks</span></div>
+                                                    <div class="fs-1 text-dark fw-bold h5 mb-0"><span id="anzahlLongdrinks">0</span></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-xl-3 mb-4">
+                                    <div class="card shadow border-left-primary py-2">
+                                        <div class="card-body">
+                                            <div class="row g-0 align-items-center">
+                                                <div class="col me-2">
+                                                    <div class="text-uppercase text-primary fw-bold text-xs mb-1"><span>Shots</span></div>
+                                                    <div class="fs-1 text-dark fw-bold h5 mb-0"><span id="anzahlShots">0</span></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 col-xl-3 mb-4">
+                                    <div class="card shadow border-left-primary py-2">
+                                        <div class="card-body">
+                                            <div class="row g-0 align-items-center">
+                                                <div class="col me-2">
+                                                    <div class="text-uppercase text-primary fw-bold text-xs mb-1"><span>Saft</span></div>
+                                                    <div class="fs-1 text-dark fw-bold h5 mb-0"><span id="anzahlSaft">0</span></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-xl-3 mb-4">
+                                    <div class="card shadow border-left-primary py-2">
+                                        <div class="card-body">
+                                            <div class="row g-0 align-items-center">
+                                                <div class="col me-2">
+                                                    <div class="text-uppercase text-primary fw-bold text-xs mb-1"><span>Sonstige</span></div>
+                                                    <div class="fs-1 text-dark fw-bold h5 mb-0"><span id="anzahlSonstige">0</span></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-xl-3 mb-4"></div>
+                                <div class="col-md-6 col-xl-3 mb-4"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="container-fluid" style="margin: 0px;padding-top: 0px;">
+                    <div class="card"></div>
+                </div>
+            </div>
+            <footer class="bg-white sticky-footer" style="width: 100%;text-align: left;margin: 0px;margin-top: 29px;">
+                <div class="container my-auto">
+                    <div class="text-center my-auto copyright"><span style="font-size: 9.8px;">© GASTROMATIX GmbH &amp; Co KG 2024</span></div>
+                </div>
+            </footer>
+        </div><a class="border rounded d-inline scroll-to-top" href="#page-top"><i class="fas fa-angle-up"></i></a>
+    </div>
+    <script src="assets/bootstrap/js/bootstrap.min.js"></script>
+    <script src="assets/js/auswertung.js"></script>
+    <script src="assets/js/index.js"></script>
+    <script src="assets/js/theme.js"></script>
+</body-->

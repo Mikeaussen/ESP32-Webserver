@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>CocktailPi App</title>
+  <style>
+    body {
+      margin: 0;
+      display: flex;
+      height: 100vh;
+      font-family: Arial, sans-serif;
+    }
+    #menu-container {
+      flex-shrink: 0;
+    }
+    #content-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    #content-frame {
+      flex: 1;
+      border: none;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <!-- Menü -->
+  <div id="menu-container"></div>
+
+  <!-- Content -->
+  <div id="content-container">
+    <iframe id="content-frame" src="menu.html"></iframe>
+  </div>
+
+  <script>
+    // Menü laden
+    fetch("menu.html")
+      .then(res => res.text())
+      .then(data => {
+        document.getElementById("menu-container").innerHTML = data;
+        // Nach Laden Menü-Links korrigieren
+        prepareMenu();
+      });
+
+    function prepareMenu() {
+      const frame = document.getElementById("content-frame");
+      // alle Links im Menü so umbauen, dass sie ins iframe laden
+      document.querySelectorAll("#menu-container a").forEach(link => {
+        link.addEventListener("click", function(e) {
+          e.preventDefault();
+          frame.src = this.getAttribute("href");
+        });
+      });
+    }
+  </script>
+</body>
+</html>

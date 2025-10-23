@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>User Management</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #1a2b3c;
+      color: white;
+    }
+    
+    h1 {
+      margin-bottom: 20px;
+    }
+    
+    .toolbar {
+      margin-bottom: 15px;
+      display: flex;            
+      justify-content: flex-end;
+    }
+
+    .toolbar button {
+      padding: 8px 14px;
+      margin-left: 5px;
+      border: none;
+      border-radius: 5px;
+      color: white;
+      cursor: pointer;
+    }
+
+    .btn-create { background-color: #28c76f; }
+    .btn-refresh { background-color: #00cfe8; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      background: #2c3e50;
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #555;
+      text-align: left;
+    }
+
+    th {
+      background: #34495e;
+    }
+
+    .actions i {
+      font-size: 18px;
+      margin-right: 10px;
+      cursor: pointer;
+    }
+
+    .edit { color: #00cfe8; }
+    .delete { color: #ea5455; }
+    .active-icon { color: #28c76f; font-size: 18px; }
+
+    .footer {
+      padding: 10px;
+      font-size: 14px;
+      color: #ccc;
+    }
+
+    .profile-pic {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    /* Modal-Fenster */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 2000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.6);
+    }
+
+    .modal-content {
+      background: #2c3e50;
+      margin: 5% auto;
+      padding: 20px;
+      border-radius: 8px;
+      width: 700px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+    }
+
+    .modal-header {
+      font-weight: bold;
+      margin-bottom: 15px;
+      font-size: 18px;
+    }
+
+    .modal input, .modal select {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 6px;
+      border-radius: 4px;
+      border: 1px solid #555;
+      background: #1a2b3c;
+      color: white;
+    }
+
+    .modal-buttons {
+      text-align: right;
+      margin-top: 15px;
+    }
+
+    .btn-cancel {
+      background: #ea5455;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .btn-save {
+      background: #28c76f;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .modal-image {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+      margin: 0 auto 10px auto;
+    }
+
+    .btn-change-image {
+      display: block;
+      margin: 0 auto;           
+      padding: 6px 12px;
+      border: none;
+      border-radius: 4px;
+      background: #00cfe8;
+      color: white;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .btn-change-image:hover {
+      background: #0099b8;
+    }
+
+    /* Rechte-Checkboxen */
+    .modal-checkboxes {
+      display: flex;
+      justify-content: space-between; /* linke + rechte Spalte */
+      margin: 20px 0;
+    }
+
+    .checkbox-column {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .right-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    .right-item input {
+      transform: scale(1.2);
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Benutzer Management</h1>
+  <div class="toolbar">
+    <button class="btn-create">Benutzer erstellen</button>
+    <button class="btn-refresh" onclick="renderUsers()">Aktualieren</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Profil</th>
+        <th>Benutzername</th>
+        <th>Aktiv</th>
+        <th>Rolle</th>
+        <th>Rechte</th>
+        <th>Aktionen</th>
+      </tr>
+    </thead>
+    <tbody id="user-table"></tbody>
+  </table>
+  <div class="footer" id="user-count"></div>
+
+  <script>
+    const users = [
+      { username: "Admin", PIN: "1111", active: true, role: "Admin", anzahl_rechte: "8", image: "web/pictures/Profile/profil_Admin.png", rechte: [true,true,true,true,true,true,true,true]},
+      { username: "Mike Aussendorf", PIN: "0409", active: false, role: "Benutzer", anzahl_rechte: "5", image:"web/pictures/Profile/profil_Mike Aussendorf.jpg", rechte: [true,false,true,false,true,false,false,false]}
+    ];
+
+    const rechteTexte = [
+      "Rezepte",
+      "Auswertung",
+      "Auswertung zurücksetzen",
+      "Reinigung",
+      "System",
+      "WiFi",
+      "Kanäle verwalten",
+      "Benutzer verwalten"
+    ];
+
+    const userTable = document.getElementById("user-table");
+    const userCount = document.getElementById("user-count");
+    let currentUser = null;
+
+    function renderUsers() {
+      userTable.innerHTML = "";
+      users.forEach((user, index) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><img src="${user.image}" class="profile-pic"></td>
+          <td>${user.username}</td>
+          <td>${user.active ? '<i class="fa-solid fa-check-circle active-icon"></i>' : ''}</td>
+          <td>${user.role}</td>
+          <td>${user.anzahl_rechte}/8</td>
+          <td class="actions">
+            <i class="fa-solid fa-pen edit" data-index="${index}"></i>
+            ${user.role !== "Admin" ? '<i class="fa-solid fa-trash delete"></i>' : ''}
+          </td>
+        `;
+        userTable.appendChild(tr);
+      });
+
+      document.querySelectorAll(".edit").forEach(icon => {
+        icon.addEventListener("click", function () {
+          const idx = this.getAttribute("data-index");
+          openModal(users[idx]);
+        });
+      });
+
+      userCount.textContent = `${users.length} user(s) in total`;
+    }
+
+    function openModal(user) {
+      currentUser = user;
+      document.getElementById("modal-profil-image").src = user.image;
+      document.getElementById("edit-username").value = user.username;
+      document.getElementById("edit-role").value = user.role;
+
+      const container = document.getElementById("rechte-container");
+      container.innerHTML = "";
+      const colLeft = document.createElement("div");
+      colLeft.className = "checkbox-column";
+      const colRight = document.createElement("div");
+      colRight.className = "checkbox-column";
+
+      rechteTexte.forEach((text, i) => {
+        const label = document.createElement("label");
+        label.className = "right-item";
+        label.innerHTML = `<input type="checkbox" id="recht-${i+1}"> ${text}`;
+        if (user.rechte[i]) label.querySelector("input").checked = true;
+        if (i < 4) {
+          colLeft.appendChild(label);
+        } else {
+          colRight.appendChild(label);
+        }
+      });
+
+      container.appendChild(colLeft);
+      container.appendChild(colRight);
+
+      document.getElementById("editModal").style.display = "block";
+    }
+
+    function closeModal() {
+      document.getElementById("editModal").style.display = "none";
+      currentUser = null;
+    }
+
+    function saveUser() {
+      var gespeierter_pin = currentUser.PIN;
+      var input_pin = document.getElementById("edit-pin").value;
+      var neu_pin1 = document.getElementById("edit-neu-pin-1").value;
+      var neu_pin2 = document.getElementById("edit-neu-pin-2").value;
+      
+      if(neu_pin1 == neu_pin2 && gespeierter_pin == input_pin) {
+        if (currentUser) {
+          currentUser.username = document.getElementById("edit-username").value;
+          currentUser.role = document.getElementById("edit-role").value;
+          currentUser.PIN = document.getElementById("edit-neu-pin-1").value;
+          
+          let neueRechte = [];
+          rechteTexte.forEach((_, i) => {
+            neueRechte.push(document.getElementById("recht-" + (i+1)).checked);
+          });
+          currentUser.rechte = neueRechte;
+          currentUser.anzahl_rechte = neueRechte.filter(r => r).length;
+
+          renderUsers();
+        }
+        closeModal();
+      } else {
+        console.log("Falscher PIN");
+      }
+    }
+
+    window.onclick = function(event) {
+      const modal = document.getElementById("editModal");
+      if (event.target === modal) {
+        closeModal();
+      }
+    };
+
+    renderUsers();
+  </script>
+
+  <!-- Popup Modal -->
+  <div id="editModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">Benutzer bearbeiten</div>
+      
+      <img id="modal-profil-image" class="modal-image" alt="Profilbild">
+      <button class="btn-change-image" onclick="alert('Bild ändern!')">Bild ändern</button>
+
+      <label>Benutzername</label>
+      <input type="text" id="edit-username">
+
+      <label>aktueller PIN</label>
+      <input type="text" id="edit-pin">
+
+      <label>neuer PIN</label>
+      <input type="text" id="edit-neu-pin-1">
+
+      <label>PIN wiederholung</label>
+      <input type="text" id="edit-neu-pin-2">
+
+      <label>Rolle</label>
+      <select id="edit-role">
+        <option value="Admin">Admin</option>
+        <option value="Chef 1">Chef 1</option>
+        <option value="Chef 2">Chef 2</option>
+        <option value="Benutzer">Benutzer</option>
+      </select>
+
+      <!-- Rechte -->
+      <div class="modal-checkboxes" id="rechte-container"></div>
+
+      <div class="modal-buttons">
+        <button class="btn-cancel" onclick="closeModal()">Abbrechen</button>
+        <button class="btn-save" onclick="saveUser()">Speichern</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

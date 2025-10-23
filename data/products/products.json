@@ -1,0 +1,172 @@
+{
+    "zutaten": [
+        {
+            "ch": 1,
+            "avlb": 700,
+            "name": "Grenadine",
+            "factor": 1371,
+            "tmout": 500
+        },
+        {
+            "ch": 2,
+            "avlb": 700,
+            "name": "Blue",
+            "factor": 1575,
+            "tmout": 500
+        },
+        {
+            "ch": 3,
+            "avlb": 700,
+            "name": "Lime",
+            "factor": 300,
+            "tmout": 500
+        },
+        {
+            "ch": 4,
+            "avlb": 700,
+            "name": "Cocos",
+            "factor": 85,
+            "tmout": 500
+        },
+        {
+            "ch": 5,
+            "avlb": 700,
+            "name": "Mandel",
+            "factor": 85,
+            "tmout": 500
+        },
+        {
+            "ch": 6,
+            "avlb": 700,
+            "name": "",
+            "factor": 85,
+            "tmout": 500
+        },
+        {
+            "ch": 7,
+            "avlb": 700,
+            "name": "",
+            "factor": 85,
+            "tmout": 500
+        },
+        {
+            "ch": 8,
+            "avlb": 700,
+            "name": "",
+            "factor": 1465,
+            "tmout": 500
+        },
+        {
+            "ch": 9,
+            "avlb": 700,
+            "name": "Ananas",
+            "factor": 2465,
+            "tmout": 500
+        },
+        {
+            "ch": 10,
+            "avlb": 700,
+            "name": "Orange",
+            "factor": 2435,
+            "tmout": 1500
+        },
+        {
+            "ch": 11,
+            "avlb": 700,
+            "name": "Maracuja",
+            "factor": 2435,
+            "tmout": 1500
+        },
+        {
+            "ch": 12,
+            "avlb": 700,
+            "name": "Cranberry",
+            "factor": 1435,
+            "tmout": 500
+        },
+        {
+            "ch": 13,
+            "avlb": 0,
+            "name": "Zitrone",
+            "factor": 2400,
+            "tmout": 500
+        },
+        {
+            "ch": 14,
+            "avlb": 0,
+            "name": "Gin",
+            "factor": 1000,
+            "tmout": 500
+        },
+        {
+            "ch": 15,
+            "avlb": 0,
+            "name": "Triple",
+            "factor": 1200,
+            "tmout": 500
+        },
+        {
+            "ch": 16,
+            "avlb": 0,
+            "name": "",
+            "factor": 1000,
+            "tmout": 400
+        },
+        {
+            "ch": 17,
+            "avlb": 0,
+            "name": "Wodka",
+            "factor": 2400,
+            "tmout": 500
+        },
+        {
+            "ch": 18,
+            "avlb": 0,
+            "name": "Cachaca",
+            "factor": 2400,
+            "tmout": 500
+        },
+        {
+            "ch": 19,
+            "avlb": 0,
+            "name": "Rum weiss",
+            "factor": 2400,
+            "tmout": 500
+        },
+        {
+            "ch": 20,
+            "avlb": 0,
+            "name": "Rum braun",
+            "factor": 2400,
+            "tmout": 500
+        },
+        {
+            "ch": 21,
+            "avlb": 0,
+            "name": "Tequila",
+            "factor": 2400,
+            "tmout": 500
+        },
+        {
+            "ch": 22,
+            "avlb": 0,
+            "name": "Pfirsich",
+            "factor": 1600,
+            "tmout": 500
+        },
+        {
+            "ch": 23,
+            "avlb": 0,
+            "name": "",
+            "factor": 2400,
+            "tmout": 500
+        },
+        {
+            "ch": 24,
+            "avlb": 0,
+            "name": "Sahne",
+            "factor": 2400,
+            "tmout": 500
+        }
+    ]
+}

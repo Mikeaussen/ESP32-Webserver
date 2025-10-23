@@ -1,0 +1,178 @@
+{
+    "name": "Virgin Swimming Pool",
+    "use": 1,
+    "plu": "000",
+    "group": 1,
+    "color": 4,
+    "comment": " ",
+    "zutaten": [
+        {
+            "name": "Grenadine",
+            "ml": [
+                0,
+                0
+            ]
+        },
+        {
+            "name": "Blue",
+            "ml": [
+                0,
+                20
+            ]
+        },
+        {
+            "name": "Lime",
+            "ml": [
+                0,
+                0
+            ]
+        },
+        {
+            "name": "Cocos",
+            "ml": [
+                20,
+                0
+            ]
+        },
+        {
+            "name": "Mandel",
+            "ml": [
+                0,
+                0
+            ]
+        },
+        {
+            "name": "6",
+            "ml": [
+                0,
+                0
+            ]
+        },
+        {
+            "name": "7",
+            "ml": [
+                0,
+                0
+            ]
+        },
+        {
+            "name": "8",
+            "ml": [
+                0,
+                0
+            ]
+        },
+        {
+            "name": "Ananas",
+            "ml": [
+                180,
+                0
+            ]
+        },
+        {
+            "name": "Orange",
+            "ml": [
+                0,
+                0
+            ]
+        },
+        {
+            "name": "Maracuja",
+            "ml": [
+                0,
+                0
+            ]
+        },
+        {
+            "name": "Cranberry",
+            "ml": [
+                0,
+                0
+            ]
+        },
+        {
+            "name": "Zitrone",
+            "ml": [
+                0,
+                0
+            ]
+        },
+        {
+            "name": "Gin",
+            "ml": [
+                0,
+                0
+            ]
+        },
+        {
+            "name": "Triple",
+            "ml": [
+                0,
+                0
+            ]
+        },
+        {
+            "name": "16",
+            "ml": [
+                0,
+                0
+            ]
+        },
+        {
+            "name": "Wodka",
+            "ml": [
+                0,
+                0
+            ]
+        },
+        {
+            "name": "Cachaca",
+            "ml": [
+                0,
+                0
+            ]
+        },
+        {
+            "name": "Rum weiss",
+            "ml": [
+                0,
+                0
+            ]
+        },
+        {
+            "name": "Rum braun",
+            "ml": [
+                0,
+                0
+            ]
+        },
+        {
+            "name": "Tequila",
+            "ml": [
+                0,
+                0
+            ]
+        },
+        {
+            "name": "Pfirsich",
+            "ml": [
+                0,
+                0
+            ]
+        },
+        {
+            "name": "23 ",
+            "ml": [
+                0,
+                0
+            ]
+        },
+        {
+            "name": "Sahne",
+            "ml": [
+                30,
+                0
+            ]
+        }
+    ]
+}
