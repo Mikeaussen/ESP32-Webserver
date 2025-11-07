@@ -124,6 +124,9 @@
 
         if (found)
         {
+          // aktiven User im Browser speichern
+          localStorage.setItem("activeUserNr", found.nr);
+          
           window.location.href = "menu.html";
         }
         else
