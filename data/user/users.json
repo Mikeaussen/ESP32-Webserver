@@ -6,21 +6,24 @@
             "name": "Admin",
             "id": "80000011941E9401",   
             "pin": "4711",
-            "role": 1
+            "role": 1,
+            "picture": "/web/pictures/Profile/profil_Admin.png"
         },
         {
             "nr": 2,
-            "name": "User 1",
+            "name": "Mike Aussendorf",
             "id": "",
             "pin": "2222",
-            "role": 2
+            "role": 2,
+            "picture": "/web/pictures/Profile/profil_Mike_Aussendorf.jpg"        
         },
         {
             "nr": 3,
             "name": "User 2",
             "id": "",
             "pin": "3333",
-            "role": 3
+            "role": 3,
+            "picture": "/web/pictures/Profile/profil_User_1.jpg"
         }
     ]
 }

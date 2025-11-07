@@ -185,9 +185,9 @@
   <!-- Sidebar -->
   <aside class="sidebar">
     <div class="logo" onclick="goHome()">
-  <img id="current_company_picture" alt="Profil"
+      <img id="current_company_picture" alt="Profil"
      onerror="this.src='/web/pictures/Profile/default_avatar.jpg'">
-</div>
+    </div>
     <ul>
       <li><button onclick="loadPage('dashboard')">Dashboard</button></li>
       <li><button onclick="loadPage('system')">System</button></li>
@@ -228,17 +228,33 @@
     </div>
   </div>
 
-  <script>
-    window.onload = function()
-    {
-      var aktuellesFirmenLogo = "/web/pictures/login_logo.png"
-      
-      var aktuellerBenutzer = "Mike Aussendorf";
-      var aktuellesProfilbild = "/web/pictures/Profile/profil_Mike_Aussendorf.jpg";
+  <script src="/user/userHandler.js"></script>
 
-      document.getElementById("current_user_name").innerText = aktuellerBenutzer;
-      document.getElementById("current_user_picture").src = aktuellesProfilbild;
-      document.getElementById("current_company_picture").src = aktuellesFirmenLogo;
+  <script>
+    window.onload = async function()
+    {
+      // JSON laden
+      const config = await UserConfig.load("/user/users.json");
+
+      // Aktiven User holen
+      const activeNr = parseInt(localStorage.getItem("activeUserNr"));
+      const activeUser = config.findUser(activeNr);
+
+      if (!activeUser)
+      {
+        alert("Kein aktiver User in users.json gefunden.");
+        logout();
+        return;
+      }
+
+      // Name setzen
+      document.getElementById("current_user_name").innerText = activeUser.name;
+
+      // Profilbild generieren
+      document.getElementById("current_user_picture").src = activeUser.picture;
+
+      // Firmenlogo bleibt wie gehabt
+      document.getElementById("current_company_picture").src = "/web/pictures/login_logo.png";
     };
 
     function toggleSubmenu(id)
@@ -247,9 +263,10 @@
       submenu.style.display = submenu.style.display === "block" ? "none" : "block";
     }
 
-    function loadPage(page) {
-  document.getElementById("content-frame").src = "/" + page + ".html";
-}
+    function loadPage(page)
+    {
+      document.getElementById("content-frame").src = "/" + page + ".html";
+    }
 
     function goHome()
     {
@@ -259,6 +276,7 @@
 
     function logout()
     {
+      localStorage.removeItem("activeUserNr");
       window.location.href = "login.html";
     }
   </script>
