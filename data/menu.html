@@ -5,187 +5,187 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GM - Gastromatix</title>
   <style>
-    .body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      display: flex;
-      height: 100vh;
-    }
-
-    /* Sidebar */
-    .sidebar {
-      width: 250px;
-      background: #1E1A3B;
-      color: white;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .logo {
-      background: #05203F;
-      padding: 15px 30px;
-      text-align: center;
-      cursor: pointer;
-      display: inline-block;
-    }
-
-    .logo img {
-      height: 40px;
-      width: auto;
-      transform: scale(2.5);
-      transform-origin: center;
-      display: inline-block;
-    }
-
-    .sidebar ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-
-    .sidebar li {
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .sidebar button {
-      background: none;
-      border: none;
-      color: white;
-      width: 100%;
-      text-align: left;
-      padding: 12px 16px;
-      font-size: 14px;
-      cursor: pointer;
-    }
-
-    .sidebar button:hover {
-      background: rgba(255, 255, 255, 0.1);
-    }
-
-    .submenu {
-      display: none;
-      background: #05203F;
-    }
-
-    .submenu button {
-      padding-left: 32px;
-      font-size: 13px;
-    }
-
-    /* Top bar */
-    .main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .topbar {
-      height: 50px;
-      background: #fff;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 0 16px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-
-    .profile {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .profile img {
-  width: 32px;              /* etwas größer als 28px */
-  height: 32px;
-  border-radius: 50%;       /* Kreis */
-  object-fit: cover;        /* Bild füllt den Kreis ohne Verzerrung */
-  object-position: center;  /* zentriert zuschneiden */
-  display: block;           /* kein extra bottom-spacing */
-  border: 2px solid #eee;   /* optional: feiner Ring */
+    body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  display: flex;
+  height: 100vh;
 }
 
-    /* iframe */
-    .content {
-      padding: 0px;
-      background: #f4f4f4;
-      flex: 1;
-    }
+/* Sidebar */
+.sidebar {
+  width: 250px;
+  background: #1E1A3B;
+  color: white;
+  display: flex;
+  flex-direction: column;
+}
 
-    .gm-logo {
-      width: 150px;
-      height: auto;
-      cursor: pointer;
-    }
+.logo {
+  background: #05203F;
+  padding: 15px 30px;
+  text-align: center;
+  cursor: pointer;
+  display: inline-block;
+}
 
-    /* Account Bereich */
+.logo img {
+  height: 40px;
+  width: auto;
+  transform: scale(2.5);
+  transform-origin: center;
+  display: inline-block;
+}
 
-    /* Container */
-    .account-wrapper {
-      position: relative;
-      display: inline-block;
-    }
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
 
-    /* Button oben */
-    .account-button {
-      background: transparent;
-      border: none;
-      outline: none;
-      color: #05203F;           /* schwarze Schrift (Topbar ist weiß) */
-      font-size: 14px;
-      font-weight: bold;
-      text-transform: uppercase;
-      cursor: pointer;
-      padding: 5px 10px;
-    }
+.sidebar li {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
 
-    /* Dropdown-Menü */
-    .account {
-      display: none;
-      position: absolute;
-      right: 0;
-      top: 100%;
-      background: white;
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      min-width: 120px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.15);
-      z-index: 1000;
-    }
+.sidebar button {
+  background: none;
+  border: none;
+  color: white;
+  width: 100%;
+  text-align: left;
+  padding: 12px 16px;
+  font-size: 14px;
+  cursor: pointer;
+}
 
-    .account li {
-      border-bottom: 1px solid #eee;
-    }
+.sidebar button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
 
-    .account li:last-child {
-      border-bottom: none;
-    }
+.submenu {
+  display: none;
+  background: #05203F;
+}
 
-    /* Buttons im Dropdown */
-    .account button {
-      width: 100%;
-      padding: 10px;
-      background: none;
-      border: none;
-      color: #05203F;
-      text-align: left;
-      font-size: 14px;
-      cursor: pointer;
-    }
+.submenu button {
+  padding-left: 32px;
+  font-size: 13px;
+}
 
-    .account button:hover {
-      background: #f0f0f0; /* hellgrau beim Hover */
-    }
+/* Main area */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* Top bar */
+.topbar {
+  height: 50px;
+  background: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 16px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.profile img {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  border: 2px solid #eee;
+}
+
+/* Content / iframe */
+.content {
+  flex: 1;
+  display: flex;
+  background: #0f2538;
+}
+
+#content-frame {
+  flex: 1;
+  width: 100%;
+  height: calc(100vh - 50px);
+  border: none;
+  background: #0f2538;
+}
+
+
+/* Account Dropdown */
+.account-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.account-button {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #05203F;
+  font-size: 14px;
+  font-weight: bold;
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: 5px 10px;
+}
+
+.account {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 100%;
+  background: white;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  min-width: 120px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+  z-index: 1000;
+}
+
+.account li {
+  border-bottom: 1px solid #eee;
+}
+
+.account li:last-child {
+  border-bottom: none;
+}
+
+.account button {
+  width: 100%;
+  padding: 10px;
+  background: none;
+  border: none;
+  color: #05203F;
+  text-align: left;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.account button:hover {
+  background: #f0f0f0;
+}
   </style>
 </head>
 <body>
   <!-- Sidebar -->
   <aside class="sidebar">
     <div class="logo" onclick="goHome()">
-  <img id="current_user_picture" alt="Profil"
+  <img id="current_company_picture" alt="Profil"
      onerror="this.src='/web/pictures/Profile/default_avatar.jpg'">
 </div>
     <ul>
@@ -224,17 +224,21 @@
       </div>
     </div>
     <div class="content" id="content">
-      <iframe id="content-frame" src="dashboard.html" style="width:100%; height:100%; border:none;"></iframe>
+      <iframe id="content-frame" src="/dashboard.html"></iframe>
     </div>
   </div>
 
   <script>
-    window.onload = function() {
+    window.onload = function()
+    {
+      var aktuellesFirmenLogo = "/web/pictures/login_logo.png"
+      
       var aktuellerBenutzer = "Mike Aussendorf";
-      var aktuellesProfilbild = "/web/pictures/Profile/profil_Mike_Aussendorf.jpeg";
+      var aktuellesProfilbild = "/web/pictures/Profile/profil_Mike_Aussendorf.jpg";
 
       document.getElementById("current_user_name").innerText = aktuellerBenutzer;
       document.getElementById("current_user_picture").src = aktuellesProfilbild;
+      document.getElementById("current_company_picture").src = aktuellesFirmenLogo;
     };
 
     function toggleSubmenu(id)
@@ -243,11 +247,9 @@
       submenu.style.display = submenu.style.display === "block" ? "none" : "block";
     }
 
-    function loadPage(page)
-    {
-      document.getElementById("page-title").innerText = page.charAt(0).toUpperCase() + page.slice(1);
-      document.getElementById("content-frame").src = page + ".html";
-    }
+    function loadPage(page) {
+  document.getElementById("content-frame").src = "/" + page + ".html";
+}
 
     function goHome()
     {
@@ -261,4 +263,4 @@
     }
   </script>
 </body>
-</html>  
+</html>
