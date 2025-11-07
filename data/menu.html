@@ -265,6 +265,7 @@
 
     function loadPage(page)
     {
+      document.getElementById("page-title").innerText = page.charAt(0).toUpperCase() + page.slice(1);
       document.getElementById("content-frame").src = "/" + page + ".html";
     }
 
