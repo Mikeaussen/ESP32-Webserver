@@ -1,0 +1,83 @@
+├──────────────────────────────────────────────────────────────────┤
+|                      Device ready for test #5                    |
+├──────────────────────────────────────────────────────────────────┤
+|                     Testing tarGzStreamExpander                  |
+└──────────────────────────────────────────────────────────────────┘
+[TAR] zombo.com/                                                              0 bytes -     2040 Total bytes
+[TAR] zombo.com/css/                                                          0 bytes -     2040 Total bytes
+[TAR] zombo.com/css/blah.css                                                 48 bytes -     2088 Total bytes
+Progress: 0% ▓▓ 100%
+[TAR] zombo.com/css/blah.css MD5 check SUCCESS!
+[TAR] zombo.com/img/                                                          0 bytes -       48 Total bytes
+[TAR] zombo.com/img/spinner.png                                            7172 bytes -     7220 Total bytes
+Progress: 0% ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ 100%
+[TAR] zombo.com/img/spinner.png MD5 check SUCCESS!
+[TAR] zombo.com/img/logo.png                                               4701 bytes -    11873 Total bytes
+Progress: 0% ▓▓▓▓▓▓▓▓▓▓▓ 100%
+[TAR] zombo.com/img/logo.png MD5 check SUCCESS!
+[TAR] zombo.com/snd/                                                          0 bytes -     4701 Total bytes
+[TAR] zombo.com/snd/inrozxa.swf                                            7925 bytes -    12626 Total bytes
+Progress: 0% ▓▓▓▓ 25% ▓▓▓▓▓▓▓▓▓▓▓▓ 100%
+[TAR] zombo.com/snd/inrozxa.swf MD5 check SUCCESS!
+[TAR] zombo.com/index.html                                                 2040 bytes -     9965 Total bytes
+Progress: 0% ▓ 25%  50%  75% ▓ 100%
+[TAR] zombo.com/index.html MD5 check SUCCESS!
+┌──────────────────────────────────────────────────────────────────┐
+|           Test #5 finished, will proceed to the next test        |
+└──────────────────────────────────────────────────────────────────┘
+├──────────────────────────────────────────────────────────────────┤
+|                 System Available heap: 327468 bytes              |
+├──────────────────────────────────────────────────────────────────┤
+|                      Device ready for test #6                    |
+├──────────────────────────────────────────────────────────────────┤
+|                 Testing gzUpdater / gzStreamUpdater              |
+└──────────────────────────────────────────────────────────────────┘
+[GZUpdater] Starting update with unknown binary size
+Progress: 0% ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓ 100%
+ets Jul 29 2019 12:21:46
+
+rst:0xc (SW_CPU_RESET),boot:0x12 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:1
+load:0x3fff0030,len:4744
+load:0x40078000,len:15672
+load:0x40080400,len:3152
+entry 0x4008059c
+
+┌──────────────────────────────────────────────────────────────────┐
+|             Basic Example Sketch for ESP32-Targz                 |
+|       If you can read this, then the gzUpdater worked :-)        |
+├──────────────────────────────────────────────────────────────────┤
+|                        Now rolling back                          |
+└──────────────────────────────────────────────────────────────────┘
+
+ets Jul 29 2019 12:21:46
+
+rst:0xc (SW_CPU_RESET),boot:0x12 (SPI_FAST_FLASH_BOOT)
+configsip: 0, SPIWP:0xee
+clk_drv:0x00,q_drv:0x00,d_drv:0x00,cs0_drv:0x00,hd_drv:0x00,wp_drv:0x00
+mode:DIO, clock div:1
+load:0x3fff0030,len:4744
+load:0x40078000,len:15672
+load:0x40080400,len:3152
+entry 0x4008059c
+
+┌──────────────────────────────────────────────────────────────────┐
+|                       ESP32-Targz Test Suite                     |
+├──────────────────────────────────────────────────────────────────┤
+|                 LittleFS (builtin) Mount Successful              |
+├──────────────────────────────────────────────────────────────────┤
+|                 System Available heap: 328352 bytes              |
+├──────────────────────────────────────────────────────────────────┤
+|                      Device ready for test #7                    |
+├──────────────────────────────────────────────────────────────────┤
+|          Source and destination FS collide, skipping test        |
+└──────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────┐
+|           Test #7 finished, will proceed to the next test        |
+└──────────────────────────────────────────────────────────────────┘
+E (21975) SPIFFS: mount failed, -10025
+|             All tests performed, press reset to restart          |
+└──────────────────────────────────────────────────────────────────┘
+
