@@ -14,7 +14,7 @@ AsyncWebServer server(80);
 const String default_httpuser = "Admin";
 const String default_httppassword = "1111";
 
-// ───────────────────── Helpers ──────────────────────────────
+// --- Helpers ---
 
 bool checkUserWebAuth(AsyncWebServerRequest *request)
 {
@@ -76,7 +76,9 @@ void configureWebServer()
     "/system.html",
     "/produkte.html",
     "/files.html",
-    "/reboot.html"
+    "/reboot.html",
+    "/login.html",
+    "/rezepte.html"
   };
 
   for (String page : protectedHTML)
@@ -95,17 +97,53 @@ void configureWebServer()
     request->send(FILESYSTEM, "/user/users.json", "application/json");
   });
 
+  server.on("/user/userHandler.js", HTTP_GET, [](AsyncWebServerRequest *request)
+  {
+    if (!checkUserWebAuth(request)) return request->requestAuthentication();
+    request->send(FILESYSTEM, "/user/userHandler.js", "application/json");
+  });
+
   server.on("/file", HTTP_GET, [](AsyncWebServerRequest *request)
   {
     if (!checkUserWebAuth(request)) return request->requestAuthentication();
-    // Place your file download/delete handler here
+    // File download/delete handler
     request->send(200, "text/plain", "File handler stub");
   });
 
   // --- Serve static web assets (JS, CSS, Images) ---
   server.serveStatic("/web/", FILESYSTEM, "/web/");
 
-  // --- Do NOT serve "/" again here! break auth! ---
+ // --- Liste aller Rezepte ---
+  server.on("/rezepte/list", HTTP_GET, [](AsyncWebServerRequest *request) {
+    if (!checkUserWebAuth(request)) return request->requestAuthentication();
+
+    File root = FILESYSTEM.open("/rezepte");
+    if (!root || !root.isDirectory())
+    {
+      request->send(500, "application/json", "[]");
+      return;
+    }
+
+    String json = "[";
+    File file = root.openNextFile();
+    bool first = true;
+    while (file)
+    {
+      String name = file.name();
+      if (name.endsWith(".json"))
+      {
+        if (!first) json += ",";
+        json += "\"" + name.substring(name.lastIndexOf('/') + 1) + "\"";
+        first = false;
+      }
+      file = root.openNextFile();
+    }
+    json += "]";
+    request->send(200, "application/json", json);
+  });
+
+  // Statische Auslieferung des /rezepte Ordners (wichtig!)
+  server.serveStatic("/rezepte/", FILESYSTEM, "/rezepte/");
 
   // --- 404 handler ---
   server.onNotFound(notFound);
