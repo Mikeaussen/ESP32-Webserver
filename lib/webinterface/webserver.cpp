@@ -60,6 +60,11 @@ void notFound(AsyncWebServerRequest *request)
 
 void configureWebServer()
 {
+  // Ordner sicherstellen
+  if (!SD.exists("/rezepte")) {
+      SD.mkdir("/rezepte");
+      Serial.println("Ordner /rezepte angelegt.");
+  }
 
   // --- Login page ---
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
@@ -145,9 +150,61 @@ void configureWebServer()
   // Statische Auslieferung des /rezepte Ordners (wichtig!)
   server.serveStatic("/rezepte/", FILESYSTEM, "/rezepte/");
 
+  // --- Speichern eines Rezeptes (RAW JSON) ---
+  static String body = "";
+
+  server.on("/saveRecipe", HTTP_POST, [](AsyncWebServerRequest *request) {
+
+    if (!checkUserWebAuth(request))
+    {
+        request->requestAuthentication();
+        return;
+    }
+
+    // JSON aus dem Body holen
+    if (request->hasParam("body", true))
+    {
+        String body = request->getParam("body", true)->value();
+
+        Serial.println("=== Kompletter JSON Body ===");
+        Serial.println(body);
+        Serial.println("===========================");
+
+        // Name aus JSON holen
+        int pos1 = body.indexOf("\"name\"");
+        int pos2 = body.indexOf(":", pos1);
+        int pos3 = body.indexOf("\"", pos2 + 1);
+        int pos4 = body.indexOf("\"", pos3 + 1);
+
+        if (pos1 < 0 || pos2 < 0 || pos3 < 0 || pos4 < 0) {
+            request->send(400, "text/plain", "JSON ohne name");
+            return;
+        }
+
+        String name = body.substring(pos3 + 1, pos4);
+        name.replace(" ", "_");
+
+        String path = "/rezepte/" + name + ".json";
+        File file = FILESYSTEM.open(path, FILE_WRITE);
+        if (!file) {
+            request->send(500, "text/plain", "Fehler Datei öffnen");
+            return;
+        }
+
+        file.print(body);
+        file.close();
+
+        request->send(200, "text/plain", "Gespeichert: " + path);
+    }
+    else 
+    {
+        request->send(400, "text/plain", "Kein Body empfangen");
+    }
+  });
+
   // --- 404 handler ---
   server.onNotFound(notFound);
 
   server.begin();
-  Serial.println("✅ Webserver started");
+  Serial.println("Webserver started");
 }

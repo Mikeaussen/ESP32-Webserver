@@ -12,7 +12,7 @@
     }
 
     header {
-      background: #05203F;
+      background: #1E1A3B;
       color: white;
       padding: 1rem;
       text-align: center;
@@ -49,7 +49,7 @@
     }
 
     .rezept {
-      background: white;
+      background: #2c3e50;
       border-radius: 10px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
       padding: 1rem;
@@ -74,18 +74,86 @@
       font-style: italic;
       margin-top: 1rem;
     }
+
+    .popup {
+    position: fixed;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    }
+
+    .popup.hidden {
+    display: none;
+    }
+
+    .popup-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    width: 400px;
+    }
+
   </style>
 </head>
 <body>
   <header>
     <button onclick="erstelleRezept()">Erstellen</button>
     <button onclick="ladeRezepte()">Aktualisieren</button>
+    <button onclick="bearbeiteRezept()">Bearbeiten</button>
     <button onclick="archiviereRezepte()">Rezepte speichern</button>
     <button onclick="holeArchivierteRezepte()">Rezepte einholen</button>
   </header>
 
   <div id="rezeptContainer" class="rezept-container", style="color:white">Lade Rezepte...</div>
   <p id="hinweis" class="hinweis"></p>
+
+  <!-- Popup-Fenster -->
+  <div id="popup" class="popup hidden">
+    <div class="popup-content">
+        <h2>Rezept erstellen</h2>
+
+        <table>
+          <tr>
+            <th><label>Name:</label></th>
+            <th><input id="rName" type="text"></th>
+          </tr>
+           <tr>
+            <th><label>Use:</label></th>
+            <th><input id="rUse" type="number"></th>
+          </tr>
+           <tr>
+            <th><label>PLU:</label></th>
+            <th><input id="rPlu" type="text"></th>
+          </tr>
+           <tr>
+            <th><label>Gruppe:</label></th>
+            <th><input id="rGroup" type="number"></th>
+          </tr>
+           <tr>
+            <th><label>Farbe:</label></th>
+            <th><input id="rColor" type="number"></th>
+          </tr>
+           <tr>
+            <th><label>Kommentar:</label></th>
+            <th><input id="rComment" type="text"></th>
+          </tr>
+        </table>
+       
+        <h3>Zutaten</h3>
+        <div id="zutatenContainer"></div>
+
+        <button id="addZutat">Zutat hinzufügen</button>
+
+        <br><br>
+        <button id="saveRecipe">Rezept speichern</button>
+        <button id="closePopup" onclick="closePopup()">Abbrechen</button>
+    </div>
+  </div>
+
+  <pre id="output"></pre>
 
   <script>
     const rezeptOrdner = '/rezepte/';
@@ -140,10 +208,21 @@
 
     function erstelleRezept()
     {
+      openPopup((recipe) => {
+        console.log("Neues Rezept erstellt:", recipe);
+        speichereRezept(recipe);
+      });
       // erstelle JSON
       // öffne JSON
       // schreibe Parameter mit Werten
       // schließe JSON
+    }
+
+    function bearbeiteRezept()
+    {
+      openPopup((recipe) => {
+        console.log("Neues Rezept erstellt:", recipe);
+      });
     }
 
     function archiviereRezepte()
@@ -153,7 +232,24 @@
 
     function holeArchivierteRezepte()
     {
-      //...
+      /*
+      {
+      "name": "Tequila Sunrise",
+      "use": 1,
+      "plu": "000",
+      "group": 0,
+      "color": 3,
+      "comment": " ",
+      "zutaten": [
+        {
+            "name": "Grenadine",
+            "ml": [
+                0,
+                20
+            ]
+        },...
+      }
+      */
     }
 
     // === Holt die Liste aller JSON-Dateien vom ESP32 ===
@@ -181,13 +277,119 @@
         .map(z => `<span>${z.name}</span>`)
         .join('');
       return `
-        <div class="rezept">
+        <div class="rezept" style="color:white">
           <h2>${rezept.name}</h2>
           <p>${rezept.comment || ''}</p>
           <div class="zutaten">${zutatenHTML}</div>
         </div>
       `;
     }
+
+    function speichereRezept(recipe)
+    {
+    fetch("/saveRecipe", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: "body=" + encodeURIComponent(JSON.stringify(recipe))
+      })
+      .then(r => r.text())
+      .then(t => alert(t));
+    }
+
+
+    // ----------------------------------------------------
+    //  Allgemeine Popup-Funktion (wichtig für deine Buttons)
+    // ----------------------------------------------------
+    function openPopup(onSaveCallback)
+    {
+      // Callback speichern, wird beim Speichern ausgeführt
+      window._popupCallback = onSaveCallback;
+
+      // alte Zutaten leeren
+      document.getElementById("zutatenContainer").innerHTML = "";
+
+      // Formularfelder zurücksetzen
+      document.getElementById("rName").value = "";
+      document.getElementById("rUse").value = "";
+      document.getElementById("rPlu").value = "";
+      document.getElementById("rGroup").value = "";
+      document.getElementById("rColor").value = "";
+      document.getElementById("rComment").value = "";
+
+      // Popup sichtbar machen
+      document.getElementById("popup").classList.remove("hidden");
+    }
+
+    function closePopup()
+    {
+      document.getElementById("popup").classList.add("hidden");
+    }
+
+    // ----------------------------------------------------
+    //  Zutaten hinzufügen
+    // ----------------------------------------------------
+    document.getElementById("addZutat").onclick = () => {
+      const container = document.getElementById("zutatenContainer");
+
+      const div = document.createElement("div");
+      div.classList.add("zutat");
+
+      div.innerHTML = `
+        <label>Name:</label>
+        <input type="text" class="zName">
+
+        <label>ml (z.B. 10, 0):</label>
+        <input type="text" class="zMl" placeholder="15,0">
+
+        <button class="removeZutat">X</button>
+        <hr>
+    `;
+
+      div.querySelector(".removeZutat").onclick = () => div.remove();
+
+      container.appendChild(div);
+    };
+
+
+    // ----------------------------------------------------
+    //  Speichern des Rezepts + Callback ausführen
+    // ----------------------------------------------------
+    document.getElementById("saveRecipe").onclick = () => {
+
+      const recipe = {
+        name: document.getElementById("rName").value,
+        use: Number(document.getElementById("rUse").value),
+        plu: document.getElementById("rPlu").value,
+        group: Number(document.getElementById("rGroup").value),
+        color: Number(document.getElementById("rColor").value),
+        comment: document.getElementById("rComment").value,
+        zutaten: []
+      };
+
+      const zDivs = document.querySelectorAll(".zutat");
+      zDivs.forEach(div => {
+        const name = div.querySelector(".zName").value;
+        const ml = div.querySelector(".zMl").value.split(",").map(v => Number(v.trim()));
+
+        recipe.zutaten.push({ name, ml });
+    });
+
+    // Ausgabe auf der Seite (Optional)
+    /*document.getElementById("output").textContent =
+        JSON.stringify(recipe, null, 4);*/
+        
+
+    // Wenn ein Callback existiert → ausführen
+    if (typeof window._popupCallback === "function")
+    {
+        window._popupCallback(recipe);
+    }
+
+    closePopup();
+    // Wenn neues Rezept angelegt, dann aktualisierungsbutton betätigen
+  };
 
     // Beim Laden der Seite automatisch starten
     document.addEventListener('DOMContentLoaded', ladeRezepte);
