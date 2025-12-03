@@ -102,7 +102,6 @@
   <header>
     <button onclick="erstelleRezept()">Erstellen</button>
     <button onclick="ladeRezepte()">Aktualisieren</button>
-    <button onclick="bearbeiteRezept()">Bearbeiten</button>
     <button onclick="archiviereRezepte()">Rezepte speichern</button>
     <button onclick="holeArchivierteRezepte()">Rezepte einholen</button>
   </header>
@@ -158,7 +157,9 @@
   <script>
     const rezeptOrdner = '/rezepte/';
 
-    // === Hauptfunktion ===
+    // ----------------------------------------------------
+    //  Holt alle JSON-Rezepte von der SD-Karte
+    // ----------------------------------------------------
     async function ladeRezepte()
     {
       const container = document.getElementById('rezeptContainer');
@@ -206,30 +207,78 @@
       }
     }
 
+
+    // ----------------------------------------------------
+    //  Erstellt Rezepte als JSON
+    // ----------------------------------------------------
     function erstelleRezept()
     {
+      window._editMode = false;
       openPopup((recipe) => {
         console.log("Neues Rezept erstellt:", recipe);
         speichereRezept(recipe);
       });
-      // erstelle JSON
-      // öffne JSON
-      // schreibe Parameter mit Werten
-      // schließe JSON
     }
 
-    function bearbeiteRezept()
+
+    // ----------------------------------------------------
+    //  Bearbeitet Rezepte im Popup
+    // ----------------------------------------------------
+    function bearbeiteRezept(rezeptString)
     {
-      openPopup((recipe) => {
-        console.log("Neues Rezept erstellt:", recipe);
+      window._editMode = true;
+      const rezept = JSON.parse(rezeptString);
+
+      openPopup((updatedRecipe) => {
+        console.log("Rezept bearbeitet:", updatedRecipe);
+        speichereRezept(updatedRecipe);
+      });
+
+      // --- Felder befüllen ---
+      document.getElementById("rName").value = rezept.name;
+      document.getElementById("rUse").value = rezept.use;
+      document.getElementById("rPlu").value = rezept.plu;
+      document.getElementById("rGroup").value = rezept.group;
+      document.getElementById("rColor").value = rezept.color;
+      document.getElementById("rComment").value = rezept.comment;
+
+      // --- Zutaten setzen ---
+      const container = document.getElementById("zutatenContainer");
+      container.innerHTML = "";
+
+      rezept.zutaten.forEach(zutat => {
+        const div = document.createElement("div");
+        div.classList.add("zutat");
+
+        div.innerHTML = `
+          <label>Name:</label>
+          <input type="text" class="zName" value="${zutat.name}">
+
+          <label>ml:</label>
+          <input type="text" class="zMl" value="${zutat.ml.join(",")}">
+
+          <button class="removeZutat">X</button>
+          <hr>
+        `;
+
+        div.querySelector(".removeZutat").onclick = () => div.remove();
+        container.appendChild(div);
       });
     }
 
+
+    // ----------------------------------------------------
+    //  Achiviert alle Rezepte
+    // ----------------------------------------------------
     function archiviereRezepte()
     {
       //...
     }
 
+
+    // ----------------------------------------------------
+    //  Holt achivierte Rezepte
+    // ----------------------------------------------------
     function holeArchivierteRezepte()
     {
       /*
@@ -252,7 +301,10 @@
       */
     }
 
-    // === Holt die Liste aller JSON-Dateien vom ESP32 ===
+    
+    // ----------------------------------------------------
+    //  Holt die Liste aller JSON-Dateien vom ESP32
+    // ----------------------------------------------------
     async function holeDateiliste()
     {
       try
@@ -269,15 +321,23 @@
       }
     }
 
-    // === Baut HTML für ein Rezept zusammen ===
+
+    // ----------------------------------------------------
+    //  Baut HTML für ein Rezept zusammen
+    // ----------------------------------------------------
     function erzeugeRezeptHTML(rezept)
     {
       const zutatenHTML = rezept.zutaten
         .filter(z => z.ml[0] > 0)
         .map(z => `<span>${z.name}</span>`)
         .join('');
+
+      // Rezept als JSON im data-Attribut speichern
+      const rezeptJson = encodeURIComponent(JSON.stringify(rezept));
+
       return `
-        <div class="rezept" style="color:white">
+        <div class="rezept" style="color:white"
+            onclick="bearbeiteRezept(decodeURIComponent('${rezeptJson}'))">
           <h2>${rezept.name}</h2>
           <p>${rezept.comment || ''}</p>
           <div class="zutaten">${zutatenHTML}</div>
@@ -285,6 +345,10 @@
       `;
     }
 
+
+  // ----------------------------------------------------
+  //  Zutaten hinzufügen
+  // ----------------------------------------------------
     function speichereRezept(recipe)
     {
     fetch("/saveRecipe", {
@@ -300,32 +364,38 @@
 
 
     // ----------------------------------------------------
-    //  Allgemeine Popup-Funktion (wichtig für deine Buttons)
+    //  Popup öffnen
     // ----------------------------------------------------
     function openPopup(onSaveCallback)
     {
-      // Callback speichern, wird beim Speichern ausgeführt
+      // Callback speichern
       window._popupCallback = onSaveCallback;
 
-      // alte Zutaten leeren
-      document.getElementById("zutatenContainer").innerHTML = "";
+      // Wenn nicht im Bearbeitungsmodus, dann Felder leeren, 
+      if (!window._editMode)
+      {
+        document.getElementById("rName").value = "";
+        document.getElementById("rUse").value = "";
+        document.getElementById("rPlu").value = "";
+        document.getElementById("rGroup").value = "";
+        document.getElementById("rColor").value = "";
+        document.getElementById("rComment").value = "";
+        document.getElementById("zutatenContainer").innerHTML = "";
+      }
 
-      // Formularfelder zurücksetzen
-      document.getElementById("rName").value = "";
-      document.getElementById("rUse").value = "";
-      document.getElementById("rPlu").value = "";
-      document.getElementById("rGroup").value = "";
-      document.getElementById("rColor").value = "";
-      document.getElementById("rComment").value = "";
-
-      // Popup sichtbar machen
+      // Popup anzeigen
       document.getElementById("popup").classList.remove("hidden");
     }
 
+
+    // ----------------------------------------------------
+    //  Popup schließen
+    // ----------------------------------------------------
     function closePopup()
     {
       document.getElementById("popup").classList.add("hidden");
     }
+
 
     // ----------------------------------------------------
     //  Zutaten hinzufügen
@@ -345,7 +415,7 @@
 
         <button class="removeZutat">X</button>
         <hr>
-    `;
+      `;
 
       div.querySelector(".removeZutat").onclick = () => div.remove();
 
@@ -374,22 +444,23 @@
         const ml = div.querySelector(".zMl").value.split(",").map(v => Number(v.trim()));
 
         recipe.zutaten.push({ name, ml });
-    });
+      });
 
-    // Ausgabe auf der Seite (Optional)
-    /*document.getElementById("output").textContent =
-        JSON.stringify(recipe, null, 4);*/
-        
+      // Hilfstext Ausgabe auf der Seite (Optional)
+      /*document.getElementById("output").textContent =
+          JSON.stringify(recipe, null, 4);*/
+          
 
-    // Wenn ein Callback existiert → ausführen
-    if (typeof window._popupCallback === "function")
-    {
-        window._popupCallback(recipe);
-    }
+      // Wenn ein Callback existiert → ausführen
+      if (typeof window._popupCallback === "function")
+      {
+          window._popupCallback(recipe);
+      }
 
-    closePopup();
-    // Wenn neues Rezept angelegt, dann aktualisierungsbutton betätigen
-  };
+      closePopup();
+      window._editMode = false;
+      // Wenn neues Rezept angelegt, dann aktualisierungsbutton betätigen
+    };
 
     // Beim Laden der Seite automatisch starten
     document.addEventListener('DOMContentLoaded', ladeRezepte);
