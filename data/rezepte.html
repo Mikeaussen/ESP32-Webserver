@@ -147,7 +147,8 @@
         <button id="addZutat">Zutat hinzufügen</button>
 
         <br><br>
-        <button id="saveRecipe">Rezept speichern</button>
+        <button id="saveRecipe" style="background:#218838;color: white;">Rezept speichern</button>
+        <button id="deleteRecipe" onclick="loescheRezept()" style="display:none;background:#dc3545;color:white;">Rezept löschen</button>
         <button id="closePopup" onclick="closePopup()">Abbrechen</button>
     </div>
   </div>
@@ -156,6 +157,7 @@
 
   <script>
     const rezeptOrdner = '/rezepte/';
+    let aktuellesRezept = null;
 
     // ----------------------------------------------------
     //  Holt alle JSON-Rezepte von der SD-Karte
@@ -226,8 +228,10 @@
     // ----------------------------------------------------
     function bearbeiteRezept(rezeptString)
     {
-      window._editMode = true;
-      const rezept = JSON.parse(rezeptString);
+      window._editMode = true;                  // Edit-Modus aktivieren
+      const rezept = JSON.parse(rezeptString);  // Rezept aus String laden
+
+      aktuellesRezept = rezept;                 // für löschen merken
 
       openPopup((updatedRecipe) => {
         console.log("Rezept bearbeitet:", updatedRecipe);
@@ -351,7 +355,7 @@
   // ----------------------------------------------------
     function speichereRezept(recipe)
     {
-    fetch("/saveRecipe", {
+      fetch("/saveRecipe", {
         method: "POST",
         headers: {
             "Content-Type": "application/x-www-form-urlencoded"
@@ -371,9 +375,16 @@
       // Callback speichern
       window._popupCallback = onSaveCallback;
 
-      // Wenn nicht im Bearbeitungsmodus, dann Felder leeren, 
-      if (!window._editMode)
+      const deleteBtn = document.getElementById("deleteRecipe");
+
+      if (window._editMode)
       {
+        deleteBtn.style.display = "inline-block";
+      }
+      else
+      {
+        deleteBtn.style.display = "none";
+
         document.getElementById("rName").value = "";
         document.getElementById("rUse").value = "";
         document.getElementById("rPlu").value = "";
@@ -383,7 +394,6 @@
         document.getElementById("zutatenContainer").innerHTML = "";
       }
 
-      // Popup anzeigen
       document.getElementById("popup").classList.remove("hidden");
     }
 
@@ -394,6 +404,35 @@
     function closePopup()
     {
       document.getElementById("popup").classList.add("hidden");
+    }
+
+
+    // ----------------------------------------------------
+    //  ausgewähltes Rezept löschen - Aktion im Popup-Fenster
+    // ----------------------------------------------------
+    function loescheRezept()
+    {
+      if (!aktuellesRezept) return;
+
+      if (!confirm("Willst du dieses Rezept wirklich löschen?"))
+        return;
+
+      fetch("/deleteRecipe", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: "body=" + encodeURIComponent(JSON.stringify(aktuellesRezept))
+      })
+      .then(r => r.text())
+      .then(t => {
+        alert(t);
+
+        closePopup();
+        aktuellesRezept = null;
+        window._editMode = false;
+        ladeRezepte();
+      });
     }
 
 
@@ -458,7 +497,9 @@
       }
 
       closePopup();
+      aktuellesRezept = null;
       window._editMode = false;
+      ladeRezepte();
       // Wenn neues Rezept angelegt, dann aktualisierungsbutton betätigen
     };
 
