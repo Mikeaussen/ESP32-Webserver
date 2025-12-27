@@ -12,7 +12,7 @@
     }
 
     header {
-      background: #1E1A3B;
+      background: #05203F;
       color: white;
       padding: 1rem;
       text-align: center;
@@ -94,6 +94,26 @@
       padding: 20px;
       border-radius: 10px;
       width: 400px;
+
+      /* damit Popup nicht unendlich größer wird */
+      max-height: 80vh;
+      overflow: hidden;     /* damit nur innen gescrollt wird */
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Zutatenbereich - scrollt innerhalb des Popups */
+    #zutatenContainer {
+      margin-top: 8px;
+      padding-right: 6px;   /* Platz für Scrollbar */
+      overflow-y: auto;
+      flex: 1;              /* nimmt restlichen Platz im Popup ein */
+      min-height: 0;        /* wichtig für flex + overflow */
+    }
+
+    /* Damit Buttons unten bleiben */
+    .popup-content .popup-actions {
+      margin-top: 12px;
     }
 
     .ml-small {
@@ -157,9 +177,11 @@
         <button id="addZutat">Zutat hinzufügen</button>
 
         <br><br>
-        <button id="saveRecipe" style="background:#218838;color: white;">Rezept speichern</button>
-        <button id="deleteRecipe" onclick="loescheRezept()" style="display:none;background:#dc3545;color:white;">Rezept löschen</button>
-        <button id="closePopup" onclick="closePopup()">Abbrechen</button>
+        <div class="popup-actions">
+          <button id="saveRecipe" style="background:#218838;color: white;">Rezept speichern</button>
+          <button id="deleteRecipe" onclick="loescheRezept()" style="display:none;background:#dc3545;color:white;">Rezept löschen</button>
+          <button id="closePopup" onclick="closePopup()">Abbrechen</button>
+        </div>    
     </div>
   </div>
 
@@ -168,6 +190,8 @@
   <script>
     const rezeptOrdner = '/rezepte/';
     let aktuellesRezept = null;
+
+
 
     // ----------------------------------------------------
     //  Holt alle JSON-Rezepte von der SD-Karte
@@ -220,6 +244,7 @@
     }
 
 
+
     // ----------------------------------------------------
     //  Erstellt Rezepte als JSON
     // ----------------------------------------------------
@@ -231,6 +256,7 @@
         speichereRezept(recipe);
       });
     }
+
 
 
     // ----------------------------------------------------
@@ -280,10 +306,16 @@
           <hr>
         `;
 
-        div.querySelector(".removeZutat").onclick = () => div.remove();
+        div.querySelector(".removeZutat").onclick = () => {
+          div.remove();
+          updateZutatenScroll();
+        };
         container.appendChild(div);
       });
+
+      updateZutatenScroll();
     }
+
 
 
     // ----------------------------------------------------
@@ -293,6 +325,7 @@
     {
       //...
     }
+
 
 
     // ----------------------------------------------------
@@ -321,6 +354,7 @@
     }
 
     
+
     // ----------------------------------------------------
     //  Holt die Liste aller JSON-Dateien vom ESP32
     // ----------------------------------------------------
@@ -339,6 +373,7 @@
         return [];
       }
     }
+
 
 
     // ----------------------------------------------------
@@ -365,9 +400,10 @@
     }
 
 
-  // ----------------------------------------------------
-  //  Zutaten hinzufügen
-  // ----------------------------------------------------
+
+    // ----------------------------------------------------
+    //  Zutaten hinzufügen
+    // ----------------------------------------------------
     function speichereRezept(recipe)
     {
       fetch("/saveRecipe", {
@@ -380,6 +416,7 @@
       .then(r => r.text())
       .then(t => alert(t));
     }
+
 
 
     // ----------------------------------------------------
@@ -410,7 +447,32 @@
       }
 
       document.getElementById("popup").classList.remove("hidden");
+
+      updateZutatenScroll();
     }
+
+
+
+    // ----------------------------------------------------
+    //  Automatische Scrollfunktion hinzufügen - Aktion im Popup-Fenster
+    // ----------------------------------------------------
+    function updateZutatenScroll()
+    {
+      const container = document.getElementById("zutatenContainer");
+      const count = container.querySelectorAll(".zutat").length;
+
+      if (count >= 3)
+      {
+        container.style.maxHeight = "220px"; // kannst du anpassen
+        container.style.overflowY = "auto";
+      }
+      else
+      {
+        container.style.maxHeight = "none";
+        container.style.overflowY = "visible";
+      }
+    }
+
 
 
     // ----------------------------------------------------
@@ -420,6 +482,7 @@
     {
       document.getElementById("popup").classList.add("hidden");
     }
+
 
 
     // ----------------------------------------------------
@@ -451,6 +514,7 @@
     }
 
 
+
     // ----------------------------------------------------
     //  Zutaten hinzufügen
     // ----------------------------------------------------
@@ -476,10 +540,16 @@
         <hr>
       `;
 
-      div.querySelector(".removeZutat").onclick = () => div.remove();
-
+      div.querySelector(".removeZutat").onclick = () => {
+        div.remove();
+        updateZutatenScroll();
+      };
       container.appendChild(div);
+
+      // nach dem Hinzufügen Scrollzustand prüfen
+      updateZutatenScroll();
     };
+
 
 
     // ----------------------------------------------------
