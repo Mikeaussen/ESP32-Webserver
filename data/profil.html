@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <title>User Management</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -211,7 +210,7 @@
   <script>
     const users = [
       { username: "Admin", PIN: "1111", active: true, role: "Admin", anzahl_rechte: "8", image: "web/pictures/Profile/profil_Admin.png", rechte: [true,true,true,true,true,true,true,true]},
-      { username: "Mike Aussendorf", PIN: "0409", active: false, role: "Benutzer", anzahl_rechte: "5", image:"web/pictures/Profile/profil_Mike Aussendorf.jpg", rechte: [true,false,true,false,true,false,false,false]}
+      { username: "Mike Aussendorf", PIN: "0409", active: false, role: "Benutzer", anzahl_rechte: "5", image:"web/pictures/Profile/profil_Mike_Aussendorf.jpg", rechte: [true,false,true,false,true,false,false,false]}
     ];
 
     const rechteTexte = [
@@ -234,7 +233,7 @@
       users.forEach((user, index) => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
-          <td><img src="${user.image}" class="profile-pic"></td>
+          <td><img src="${user.image}" style="width:80px; height:80px; border-radius:50%; object-fit:cover;" alt="Profilbild"></td>
           <td>${user.username}</td>
           <td>${user.active ? '<i class="fa-solid fa-check-circle active-icon"></i>' : ''}</td>
           <td>${user.role}</td>

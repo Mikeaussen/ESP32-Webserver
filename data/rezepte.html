@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Rezepte</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      background-color: #05203F;
+      margin: 0;
+      padding: 0;
+    }
+
+    header {
+      background: #05203F;
+      color: white;
+      padding: 1rem;
+      text-align: center;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header h1 { margin: 0; }
+    header button {
+      background: #28a745;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    header button:first-of-type {
+      margin-left: auto;
+    }
+
+    header button + button {
+      margin-left: 0.3rem;
+    }
+
+    header button:hover { background: #218838; }
+    .rezept-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1rem;
+      padding: 1rem;
+    }
+
+    .rezept {
+      background: #2c3e50;
+      border-radius: 10px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      padding: 1rem;
+      transition: transform 0.2s;
+    }
+
+    .rezept:hover { transform: scale(1.03); }
+    .rezept h2 { margin: 0 0 0.5rem 0; font-size: 1.2rem; }
+    .zutaten span {
+      display: inline-block;
+      background: #1E1A3B;
+      color: white;
+      padding: 3px 8px;
+      margin: 2px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+    }
+
+    .hinweis {
+      text-align: center;
+      color: #888;
+      font-style: italic;
+      margin-top: 1rem;
+    }
+
+    .popup {
+      position: fixed;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .popup.hidden {
+      display: none;
+    }
+
+    .popup-content {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      width: 400px;
+
+      /* damit Popup nicht unendlich größer wird */
+      max-height: 80vh;
+      overflow: hidden;     /* damit nur innen gescrollt wird */
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Zutatenbereich - scrollt innerhalb des Popups */
+    #zutatenContainer {
+      margin-top: 8px;
+      padding-right: 6px;   /* Platz für Scrollbar */
+      overflow-y: auto;
+      flex: 1;              /* nimmt restlichen Platz im Popup ein */
+      min-height: 0;        /* wichtig für flex + overflow */
+    }
+
+    /* Damit Buttons unten bleiben */
+    .popup-content .popup-actions {
+      margin-top: 12px;
+    }
+
+    .ml-small {
+      width: 2.5em;
+      text-align: center;
+    }
+
+    hr.linebreak {
+      border: none;
+      height: 0;
+      margin: 6px 0;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <button onclick="erstelleRezept()">Erstellen</button>
+    <button onclick="ladeRezepte()">Aktualisieren</button>
+    <button onclick="archiviereRezepte()">Rezepte speichern</button>
+    <button onclick="holeArchivierteRezepte()">Rezepte einholen</button>
+  </header>
+
+  <div id="rezeptContainer" class="rezept-container", style="color:white">Lade Rezepte...</div>
+  <p id="hinweis" class="hinweis"></p>
+
+  <!-- Popup-Fenster -->
+  <div id="popup" class="popup hidden">
+    <div class="popup-content">
+        <h2>Rezept erstellen</h2>
+
+        <table>
+          <tr>
+            <th><label>Name:</label></th>
+            <th><input id="rName" type="text"></th>
+          </tr>
+           <tr>
+            <th><label>Use:</label></th>
+            <th><input id="rUse" type="number"></th>
+          </tr>
+           <tr>
+            <th><label>PLU:</label></th>
+            <th><input id="rPlu" type="text"></th>
+          </tr>
+           <tr>
+            <th><label>Gruppe:</label></th>
+            <th><input id="rGroup" type="number"></th>
+          </tr>
+           <tr>
+            <th><label>Farbe:</label></th>
+            <th><input id="rColor" type="number"></th>
+          </tr>
+           <tr>
+            <th><label>Kommentar:</label></th>
+            <th><input id="rComment" type="text"></th>
+          </tr>
+        </table>
+       
+        <h3>Zutaten</h3>
+        <div id="zutatenContainer"></div>
+
+        <button id="addZutat">Zutat hinzufügen</button>
+
+        <br><br>
+        <div class="popup-actions">
+          <button id="saveRecipe" style="background:#218838;color: white;">Rezept speichern</button>
+          <button id="deleteRecipe" onclick="loescheRezept()" style="display:none;background:#dc3545;color:white;">Rezept löschen</button>
+          <button id="closePopup" onclick="closePopup()">Abbrechen</button>
+        </div>    
+    </div>
+  </div>
+
+  <pre id="output"></pre>
+
+  <script>
+    const rezeptOrdner = '/rezepte/';
+    let aktuellesRezept = null;
+
+
+
+    // ----------------------------------------------------
+    //  Holt alle JSON-Rezepte von der SD-Karte
+    // ----------------------------------------------------
+    async function ladeRezepte()
+    {
+      const container = document.getElementById('rezeptContainer');
+      const hinweis = document.getElementById('hinweis');
+      container.innerHTML = 'Lade Rezepte...';
+      hinweis.textContent = '';
+
+      try
+      {
+        const dateien = await holeDateiliste();
+        if (!dateien.length)
+        {
+          container.innerHTML = '<p style="text-align:center;color:white">Keine Rezepte gefunden.</p>';
+          return;
+        }
+
+        container.innerHTML = '';
+        for (const datei of dateien)
+        {
+          try
+          {
+            const res = await fetch(rezeptOrdner + datei);
+            if (!res.ok)
+            {
+              console.warn(`Konnte ${datei} nicht laden`);
+              continue;
+            }
+            const rezept = await res.json();
+            container.innerHTML += erzeugeRezeptHTML(rezept);
+          } catch (err)
+          {
+            console.error('Fehler beim Laden des Rezepts', datei, err);
+          }
+        }
+
+        if (container.innerHTML.trim() === '')
+        {
+          container.innerHTML = '<p style="text-align:center;color:white">Keine Rezepte gefunden.</p>';
+        }
+      }
+      catch (error)
+      {
+        console.error(error);
+        container.innerHTML = '<p style="text-align:center;color:red;">Fehler beim Laden der Rezepte.</p>';
+      }
+    }
+
+
+
+    // ----------------------------------------------------
+    //  Erstellt Rezepte als JSON
+    // ----------------------------------------------------
+    function erstelleRezept()
+    {
+      window._editMode = false;
+      openPopup((recipe) => {
+        console.log("Neues Rezept erstellt:", recipe);
+        speichereRezept(recipe);
+      });
+    }
+
+
+
+    // ----------------------------------------------------
+    //  Bearbeitet Rezepte im Popup
+    // ----------------------------------------------------
+    function bearbeiteRezept(rezeptString)
+    {
+      window._editMode = true;                  // Edit-Modus aktivieren
+      const rezept = JSON.parse(rezeptString);  // Rezept aus String laden
+
+      aktuellesRezept = rezept;                 // für löschen merken
+
+      openPopup((updatedRecipe) => {
+        console.log("Rezept bearbeitet:", updatedRecipe);
+        speichereRezept(updatedRecipe);
+      });
+
+      // --- Felder befüllen ---
+      document.getElementById("rName").value = rezept.name;
+      document.getElementById("rUse").value = rezept.use;
+      document.getElementById("rPlu").value = rezept.plu;
+      document.getElementById("rGroup").value = rezept.group;
+      document.getElementById("rColor").value = rezept.color;
+      document.getElementById("rComment").value = rezept.comment;
+
+      // --- Zutaten setzen ---
+      const container = document.getElementById("zutatenContainer");
+      container.innerHTML = "";
+
+      rezept.zutaten.forEach(zutat => {
+        const div = document.createElement("div");
+        div.classList.add("zutat");
+
+        div.innerHTML = `
+          <label>Name:</label>
+          <input type="text" class="zName" value="${zutat.name}">
+
+          <hr class="linebreak">
+
+          <label>ml 1:</label>
+          <input type="number" max="99" min="0" class="zMl1 ml-small" value="${(zutat.ml && zutat.ml[0] != null) ? zutat.ml[0] : 0}">
+
+          <label>ml 2:</label>
+          <input type="number" max="99" min="0" class="zMl2 ml-small" value="${(zutat.ml && zutat.ml[1] != null) ? zutat.ml[1] : 0}">
+
+          <button class="removeZutat">X</button>
+          <hr>
+        `;
+
+        div.querySelector(".removeZutat").onclick = () => {
+          div.remove();
+          updateZutatenScroll();
+        };
+        container.appendChild(div);
+      });
+
+      updateZutatenScroll();
+    }
+
+
+
+    // ----------------------------------------------------
+    //  Achiviert alle Rezepte
+    // ----------------------------------------------------
+    function archiviereRezepte()
+    {
+      //...
+    }
+
+
+
+    // ----------------------------------------------------
+    //  Holt achivierte Rezepte
+    // ----------------------------------------------------
+    function holeArchivierteRezepte()
+    {
+      /*
+      {
+      "name": "Tequila Sunrise",
+      "use": 1,
+      "plu": "000",
+      "group": 0,
+      "color": 3,
+      "comment": " ",
+      "zutaten": [
+        {
+            "name": "Grenadine",
+            "ml": [
+                0,
+                20
+            ]
+        },...
+      }
+      */
+    }
+
+    
+
+    // ----------------------------------------------------
+    //  Holt die Liste aller JSON-Dateien vom ESP32
+    // ----------------------------------------------------
+    async function holeDateiliste()
+    {
+      try
+      {
+        const res = await fetch('/rezepte/list');
+        if (!res.ok) throw new Error('Fehler beim Abrufen der Dateiliste');
+        const dateien = await res.json();
+        return dateien.filter(name => name.endsWith('.json'));
+      }
+      catch (err)
+      {
+        console.error('Fehler beim Abrufen der Dateiliste:', err);
+        return [];
+      }
+    }
+
+
+
+    // ----------------------------------------------------
+    //  Baut HTML für ein Rezept zusammen
+    // ----------------------------------------------------
+    function erzeugeRezeptHTML(rezept)
+    {
+      const zutatenHTML = rezept.zutaten
+        //.filter(z => (z.ml?.[0] || 0) > 0 || (z.ml?.[1] || 0) > 0)
+        .map(z => `<span>${z.name}</span>`)
+        .join('');
+
+      // Rezept als JSON im data-Attribut speichern
+      const rezeptJson = encodeURIComponent(JSON.stringify(rezept));
+
+      return `
+        <div class="rezept" style="color:white"
+            onclick="bearbeiteRezept(decodeURIComponent('${rezeptJson}'))">
+          <h2>${rezept.name}</h2>
+          <p>${rezept.comment || ''}</p>
+          <div class="zutaten">${zutatenHTML}</div>
+        </div>
+      `;
+    }
+
+
+
+    // ----------------------------------------------------
+    //  Zutaten hinzufügen
+    // ----------------------------------------------------
+    function speichereRezept(recipe)
+    {
+      fetch("/saveRecipe", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: "body=" + encodeURIComponent(JSON.stringify(recipe))
+      })
+      .then(r => r.text())
+      .then(t => alert(t));
+    }
+
+
+
+    // ----------------------------------------------------
+    //  Popup öffnen
+    // ----------------------------------------------------
+    function openPopup(onSaveCallback)
+    {
+      // Callback speichern
+      window._popupCallback = onSaveCallback;
+
+      const deleteBtn = document.getElementById("deleteRecipe");
+
+      if (window._editMode)
+      {
+        deleteBtn.style.display = "inline-block";
+      }
+      else
+      {
+        deleteBtn.style.display = "none";
+
+        document.getElementById("rName").value = "";
+        document.getElementById("rUse").value = "";
+        document.getElementById("rPlu").value = "";
+        document.getElementById("rGroup").value = "";
+        document.getElementById("rColor").value = "";
+        document.getElementById("rComment").value = "";
+        document.getElementById("zutatenContainer").innerHTML = "";
+      }
+
+      document.getElementById("popup").classList.remove("hidden");
+
+      updateZutatenScroll();
+    }
+
+
+
+    // ----------------------------------------------------
+    //  Automatische Scrollfunktion hinzufügen - Aktion im Popup-Fenster
+    // ----------------------------------------------------
+    function updateZutatenScroll()
+    {
+      const container = document.getElementById("zutatenContainer");
+      const count = container.querySelectorAll(".zutat").length;
+
+      if (count >= 3)
+      {
+        container.style.maxHeight = "220px"; // kannst du anpassen
+        container.style.overflowY = "auto";
+      }
+      else
+      {
+        container.style.maxHeight = "none";
+        container.style.overflowY = "visible";
+      }
+    }
+
+
+
+    // ----------------------------------------------------
+    //  Popup schließen
+    // ----------------------------------------------------
+    function closePopup()
+    {
+      document.getElementById("popup").classList.add("hidden");
+    }
+
+
+
+    // ----------------------------------------------------
+    //  ausgewähltes Rezept löschen - Aktion im Popup-Fenster
+    // ----------------------------------------------------
+    function loescheRezept()
+    {
+      if (!aktuellesRezept) return;
+
+      if (!confirm("Willst du dieses Rezept wirklich löschen?"))
+        return;
+
+      fetch("/deleteRecipe", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: "body=" + encodeURIComponent(JSON.stringify(aktuellesRezept))
+      })
+      .then(r => r.text())
+      .then(t => {
+        alert(t);
+
+        closePopup();
+        aktuellesRezept = null;
+        window._editMode = false;
+        ladeRezepte();
+      });
+    }
+
+
+
+    // ----------------------------------------------------
+    //  Zutaten hinzufügen
+    // ----------------------------------------------------
+    document.getElementById("addZutat").onclick = () => {
+      const container = document.getElementById("zutatenContainer");
+
+      const div = document.createElement("div");
+      div.classList.add("zutat");
+
+      div.innerHTML = `
+        <label>Name:</label>
+        <input type="text" class="zName">
+        
+        <hr class="linebreak">
+
+        <label>ml 1:</label>
+        <input type="number" max="99" min="0" class="zMl1 ml-small" placeholder="15" value="0">
+
+        <label>ml 2:</label>
+        <input type="number" max="99" min="0" class="zMl2 ml-small" placeholder="0" value="0">
+
+        <button class="removeZutat">X</button>
+        <hr>
+      `;
+
+      div.querySelector(".removeZutat").onclick = () => {
+        div.remove();
+        updateZutatenScroll();
+      };
+      container.appendChild(div);
+
+      // nach dem Hinzufügen Scrollzustand prüfen
+      updateZutatenScroll();
+    };
+
+
+
+    // ----------------------------------------------------
+    //  Speichern des Rezepts + Callback ausführen
+    // ----------------------------------------------------
+    document.getElementById("saveRecipe").onclick = () => {
+
+      const recipe = {
+        name: document.getElementById("rName").value,
+        use: Number(document.getElementById("rUse").value),
+        plu: document.getElementById("rPlu").value,
+        group: Number(document.getElementById("rGroup").value),
+        color: Number(document.getElementById("rColor").value),
+        comment: document.getElementById("rComment").value,
+        zutaten: []
+      };
+
+      const zDivs = document.querySelectorAll(".zutat");
+      zDivs.forEach(div => {
+        const name = div.querySelector(".zName").value;
+        const ml1 = Number(div.querySelector(".zMl1")?.value ?? 0);
+        const ml2 = Number(div.querySelector(".zMl2")?.value ?? 0);
+
+        recipe.zutaten.push({ name, ml: [ml1, ml2] });
+      });
+
+      // Hilfstext Ausgabe auf der Seite (Optional)
+      /*document.getElementById("output").textContent =
+          JSON.stringify(recipe, null, 4);*/
+          
+
+      // Wenn ein Callback existiert → ausführen
+      if (typeof window._popupCallback === "function")
+      {
+          window._popupCallback(recipe);
+      }
+
+      closePopup();
+      aktuellesRezept = null;
+      window._editMode = false;
+      ladeRezepte();
+      // Wenn neues Rezept angelegt, dann aktualisierungsbutton betätigen
+    };
+
+    // Beim Laden der Seite automatisch starten
+    document.addEventListener('DOMContentLoaded', ladeRezepte);
+  </script>
+</body>
+</html>
