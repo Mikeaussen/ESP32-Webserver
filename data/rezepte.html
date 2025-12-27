@@ -76,26 +76,36 @@
     }
 
     .popup {
-    position: fixed;
-    left: 0; top: 0;
-    width: 100%; height: 100%;
-    background: rgba(0,0,0,0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
+      position: fixed;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
     .popup.hidden {
-    display: none;
+      display: none;
     }
 
     .popup-content {
-    background: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    width: 400px;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      width: 400px;
     }
 
+    .ml-small {
+      width: 2.5em;
+      text-align: center;
+    }
+
+    hr.linebreak {
+      border: none;
+      height: 0;
+      margin: 6px 0;
+    }
   </style>
 </head>
 <body>
@@ -258,8 +268,13 @@
           <label>Name:</label>
           <input type="text" class="zName" value="${zutat.name}">
 
-          <label>ml:</label>
-          <input type="text" class="zMl" value="${zutat.ml.join(",")}">
+          <hr class="linebreak">
+
+          <label>ml 1:</label>
+          <input type="number" max="99" min="0" class="zMl1 ml-small" value="${(zutat.ml && zutat.ml[0] != null) ? zutat.ml[0] : 0}">
+
+          <label>ml 2:</label>
+          <input type="number" max="99" min="0" class="zMl2 ml-small" value="${(zutat.ml && zutat.ml[1] != null) ? zutat.ml[1] : 0}">
 
           <button class="removeZutat">X</button>
           <hr>
@@ -332,7 +347,7 @@
     function erzeugeRezeptHTML(rezept)
     {
       const zutatenHTML = rezept.zutaten
-        .filter(z => z.ml[0] > 0)
+        .filter(z => (z.ml?.[0] || 0) > 0 || (z.ml?.[1] || 0) > 0)
         .map(z => `<span>${z.name}</span>`)
         .join('');
 
@@ -448,9 +463,14 @@
       div.innerHTML = `
         <label>Name:</label>
         <input type="text" class="zName">
+        
+        <hr class="linebreak">
 
-        <label>ml (z.B. 10, 0):</label>
-        <input type="text" class="zMl" placeholder="15,0">
+        <label>ml 1:</label>
+        <input type="number" max="99" min="0" class="zMl1 ml-small" placeholder="15" value="0">
+
+        <label>ml 2:</label>
+        <input type="number" max="99" min="0" class="zMl2 ml-small" placeholder="0" value="0">
 
         <button class="removeZutat">X</button>
         <hr>
@@ -480,9 +500,10 @@
       const zDivs = document.querySelectorAll(".zutat");
       zDivs.forEach(div => {
         const name = div.querySelector(".zName").value;
-        const ml = div.querySelector(".zMl").value.split(",").map(v => Number(v.trim()));
+        const ml1 = Number(div.querySelector(".zMl1")?.value ?? 0);
+        const ml2 = Number(div.querySelector(".zMl2")?.value ?? 0);
 
-        recipe.zutaten.push({ name, ml });
+        recipe.zutaten.push({ name, ml: [ml1, ml2] });
       });
 
       // Hilfstext Ausgabe auf der Seite (Optional)
