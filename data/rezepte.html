@@ -347,7 +347,7 @@
     function erzeugeRezeptHTML(rezept)
     {
       const zutatenHTML = rezept.zutaten
-        .filter(z => (z.ml?.[0] || 0) > 0 || (z.ml?.[1] || 0) > 0)
+        //.filter(z => (z.ml?.[0] || 0) > 0 || (z.ml?.[1] || 0) > 0)
         .map(z => `<span>${z.name}</span>`)
         .join('');
 
