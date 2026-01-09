@@ -73,7 +73,7 @@ void configureWebServer()
   });
 
   // --- Protected HTML pages served only after login ---
-  const char* protectedHTML[] = 
+  const char* htmlPages[] = 
   {
     "/menu.html",
     "/dashboard.html",
@@ -86,15 +86,13 @@ void configureWebServer()
     "/rezepte.html"
   };
 
-  for (String page : protectedHTML)
+for (String page : htmlPages)
+{
+  server.on(page.c_str(), HTTP_GET, [page](AsyncWebServerRequest *request)
   {
-    server.on(page.c_str(), HTTP_GET, [page](AsyncWebServerRequest *request)
-    {
-      if (!checkUserWebAuth(request)) return request->requestAuthentication();
-      request->send(FILESYSTEM, page, "text/html");
-    });
-  }
-
+    request->send(FILESYSTEM, page, "text/html");
+  });
+}
   // --- Protected JSON/API Endpoints ---
   server.on("/user/users.json", HTTP_GET, [](AsyncWebServerRequest *request)
   {
@@ -103,13 +101,11 @@ void configureWebServer()
 
   server.on("/user/userHandler.js", HTTP_GET, [](AsyncWebServerRequest *request)
   {
-    if (!checkUserWebAuth(request)) return request->requestAuthentication();
     request->send(FILESYSTEM, "/user/userHandler.js", "application/json");
   });
 
   server.on("/file", HTTP_GET, [](AsyncWebServerRequest *request)
   {
-    if (!checkUserWebAuth(request)) return request->requestAuthentication();
     // File download/delete handler
     request->send(200, "text/plain", "File handler stub");
   });
@@ -120,8 +116,6 @@ void configureWebServer()
  // --- Liste aller Rezepte ---
   server.on("/rezepte/list", HTTP_GET, [](AsyncWebServerRequest *request)
   {
-    if (!checkUserWebAuth(request)) return request->requestAuthentication();
-
     File root = FILESYSTEM.open("/rezepte");
     if (!root || !root.isDirectory())
     {
@@ -153,13 +147,6 @@ void configureWebServer()
     // --- Speichern eines Rezeptes (RAW JSON) ---
   server.on("/saveRecipe", HTTP_POST, [](AsyncWebServerRequest *request)
   {
-
-    if (!checkUserWebAuth(request))
-    {
-      request->requestAuthentication();
-      return;
-    }
-
     // JSON aus dem Body holen
     if (request->hasParam("body", true))
     {
@@ -206,13 +193,6 @@ void configureWebServer()
   // --- Löschen eines Rezeptes (RAW JSON als Form-Param "body") ---
   server.on("/deleteRecipe", HTTP_POST, [](AsyncWebServerRequest *request)
   {
-
-    if (!checkUserWebAuth(request))
-    {
-      request->requestAuthentication();
-      return;
-    }
-
     if (request->hasParam("body", true))
     {
       String body = request->getParam("body", true)->value();
