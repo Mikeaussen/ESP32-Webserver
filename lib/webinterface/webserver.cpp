@@ -119,7 +119,8 @@ void configureWebServer()
   server.serveStatic("/web/", FILESYSTEM, "/web/");
 
  // --- Liste aller Rezepte ---
-  server.on("/rezepte/list", HTTP_GET, [](AsyncWebServerRequest *request) {
+  server.on("/rezepte/list", HTTP_GET, [](AsyncWebServerRequest *request)
+  {
     if (!checkUserWebAuth(request)) return request->requestAuthentication();
 
     File root = FILESYSTEM.open("/rezepte");
@@ -150,57 +151,121 @@ void configureWebServer()
   // Statische Auslieferung des /rezepte Ordners (wichtig!)
   server.serveStatic("/rezepte/", FILESYSTEM, "/rezepte/");
 
-  // --- Speichern eines Rezeptes (RAW JSON) ---
-  static String body = "";
-
-  server.on("/saveRecipe", HTTP_POST, [](AsyncWebServerRequest *request) {
+    // --- Speichern eines Rezeptes (RAW JSON) ---
+  server.on("/saveRecipe", HTTP_POST, [](AsyncWebServerRequest *request)
+  {
 
     if (!checkUserWebAuth(request))
     {
-        request->requestAuthentication();
-        return;
+      request->requestAuthentication();
+      return;
     }
 
     // JSON aus dem Body holen
     if (request->hasParam("body", true))
     {
-        String body = request->getParam("body", true)->value();
+      String body = request->getParam("body", true)->value();
 
-        Serial.println("=== Kompletter JSON Body ===");
-        Serial.println(body);
-        Serial.println("===========================");
+      Serial.println("=== Kompletter JSON Body ===");
+      Serial.println(body);
+      Serial.println("===========================");
 
-        // Name aus JSON holen
-        int pos1 = body.indexOf("\"name\"");
-        int pos2 = body.indexOf(":", pos1);
-        int pos3 = body.indexOf("\"", pos2 + 1);
-        int pos4 = body.indexOf("\"", pos3 + 1);
+      // Name aus JSON holen
+      int pos1 = body.indexOf("\"name\"");
+      int pos2 = body.indexOf(":", pos1);
+      int pos3 = body.indexOf("\"", pos2 + 1);
+      int pos4 = body.indexOf("\"", pos3 + 1);
 
-        if (pos1 < 0 || pos2 < 0 || pos3 < 0 || pos4 < 0) {
-            request->send(400, "text/plain", "JSON ohne name");
-            return;
-        }
+      if (pos1 < 0 || pos2 < 0 || pos3 < 0 || pos4 < 0)
+      {
+        request->send(400, "text/plain", "JSON ohne name");
+        return;
+      }
 
-        String name = body.substring(pos3 + 1, pos4);
-        name.replace(" ", "_");
+      String name = body.substring(pos3 + 1, pos4);
+      name.replace(" ", "_");
 
-        String path = "/rezepte/" + name + ".json";
-        File file = FILESYSTEM.open(path, FILE_WRITE);
-        if (!file) {
-            request->send(500, "text/plain", "Fehler Datei öffnen");
-            return;
-        }
+      String path = "/rezepte/" + name + ".json";
+      File file = FILESYSTEM.open(path, FILE_WRITE);
+      if (!file)
+      {
+        request->send(500, "text/plain", "Fehler Datei öffnen");
+        return;
+      }
 
-        file.print(body);
-        file.close();
+      file.print(body);
+      file.close();
 
-        request->send(200, "text/plain", "Gespeichert: " + path);
+      request->send(200, "text/plain", "Gespeichert: " + path);
     }
-    else 
+    else
     {
-        request->send(400, "text/plain", "Kein Body empfangen");
+      request->send(400, "text/plain", "Kein Body empfangen");
     }
   });
+
+  // --- Löschen eines Rezeptes (RAW JSON als Form-Param "body") ---
+  server.on("/deleteRecipe", HTTP_POST, [](AsyncWebServerRequest *request)
+  {
+
+    if (!checkUserWebAuth(request))
+    {
+      request->requestAuthentication();
+      return;
+    }
+
+    if (request->hasParam("body", true))
+    {
+      String body = request->getParam("body", true)->value();
+
+      Serial.println("=== Delete JSON Body ===");
+      Serial.println(body);
+      Serial.println("=======================");
+
+      // Name aus JSON holen
+      int pos1 = body.indexOf("\"name\"");
+      int pos2 = body.indexOf(":", pos1);
+      int pos3 = body.indexOf("\"", pos2 + 1);
+      int pos4 = body.indexOf("\"", pos3 + 1);
+
+      if (pos1 < 0 || pos2 < 0 || pos3 < 0 || pos4 < 0)
+      {
+        request->send(400, "text/plain", "JSON ohne name");
+        return;
+      }
+
+      String name = body.substring(pos3 + 1, pos4);
+
+      // gleicher Dateiname wie beim Speichern
+      name.replace(" ", "_");
+
+      // minimale Pfad-Sicherheit
+      name.replace("/", "_");
+      name.replace("\\", "_");
+      name.replace("..", "_");
+
+      String path = "/rezepte/" + name + ".json";
+
+      if (!FILESYSTEM.exists(path))
+      {
+        request->send(404, "text/plain", "Datei nicht gefunden: " + path);
+        return;
+      }
+
+      if (!FILESYSTEM.remove(path))
+      {
+        request->send(500, "text/plain", "Konnte nicht löschen: " + path);
+        return;
+      }
+
+      request->send(200, "text/plain", "Gelöscht: " + path);
+    }
+    else
+    {
+      request->send(400, "text/plain", "Kein Body empfangen");
+    }
+  });
+
 
   // --- 404 handler ---
   server.onNotFound(notFound);
