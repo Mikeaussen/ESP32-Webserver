@@ -98,7 +98,6 @@ void configureWebServer()
   // --- Protected JSON/API Endpoints ---
   server.on("/user/users.json", HTTP_GET, [](AsyncWebServerRequest *request)
   {
-    if (!checkUserWebAuth(request)) return request->requestAuthentication();
     request->send(FILESYSTEM, "/user/users.json", "application/json");
   });
 
