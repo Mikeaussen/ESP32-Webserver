@@ -61,7 +61,8 @@ void notFound(AsyncWebServerRequest *request)
 void configureWebServer()
 {
   // Ordner sicherstellen
-  if (!SD.exists("/rezepte")) {
+  if (!SD.exists("/rezepte"))
+  {
       SD.mkdir("/rezepte");
       Serial.println("Ordner /rezepte angelegt.");
   }
@@ -86,13 +87,14 @@ void configureWebServer()
     "/rezepte.html"
   };
 
-for (String page : htmlPages)
-{
-  server.on(page.c_str(), HTTP_GET, [page](AsyncWebServerRequest *request)
+  for (String page : htmlPages)
   {
-    request->send(FILESYSTEM, page, "text/html");
-  });
-}
+    server.on(page.c_str(), HTTP_GET, [page](AsyncWebServerRequest *request)
+    {
+      request->send(FILESYSTEM, page, "text/html");
+    });
+  }
+
   // --- Protected JSON/API Endpoints ---
   server.on("/user/users.json", HTTP_GET, [](AsyncWebServerRequest *request)
   {
@@ -112,6 +114,9 @@ for (String page : htmlPages)
 
   // --- Serve static web assets (JS, CSS, Images) ---
   server.serveStatic("/web/", FILESYSTEM, "/web/");
+
+  // --- Serve products (Zutatenliste) ---
+  server.serveStatic("/products/", FILESYSTEM, "/products/");
 
  // --- Liste aller Rezepte ---
   server.on("/rezepte/list", HTTP_GET, [](AsyncWebServerRequest *request)
@@ -244,7 +249,6 @@ for (String page : htmlPages)
       request->send(400, "text/plain", "Kein Body empfangen");
     }
   });
-
 
   // --- 404 handler ---
   server.onNotFound(notFound);

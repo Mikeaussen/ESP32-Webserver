@@ -13,7 +13,7 @@
 #include "ESP32-targz.h"
 #define FILESYSTEM SD
 
-String ssid    = "GASTROMATIX"; // 192.168.1.53
+String ssid    = "GASTROMATIX"; // 192.168.1.52
 String wifipassword = "22809860032031599074";// const char* ssid = "GASTROMATIX";
 // const String ssid = "SSID";
 // const String wifipassword = "Password";
@@ -150,6 +150,7 @@ void setup()
 
   Serial.print("\nConnecting to Wifi: ");
   WiFi.begin(ssid.c_str(), wifipassword.c_str());
+  delay(10000);
   while (WiFi.status() != WL_CONNECTED)
   {
     delay(500);

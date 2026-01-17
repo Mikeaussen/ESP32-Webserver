@@ -126,6 +126,10 @@
       height: 0;
       margin: 6px 0;
     }
+
+    .zSelect {
+      width: 180px;      /* nach Geschmack */
+    }
   </style>
 </head>
 <body>
@@ -190,6 +194,79 @@
   <script>
     const rezeptOrdner = '/rezepte/';
     let aktuellesRezept = null;
+    let alleZutaten = [];
+
+    // ----------------------------------------------------
+    // Lädt und sammelt eindeutige Zutaten aus products.json
+    // ----------------------------------------------------
+    async function ladeZutatenAusProducts()
+    {
+      try {
+        // JSON-Datei laden (ohne Cache)
+        const url = "/products/products.json";
+        const res = await fetch(url, { cache: "no-store" });
+        
+        // HTTP-Fehler abfangen
+        if (!res.ok) throw new Error("HTTP " + res.status);
+
+        // JSON parsen
+        const data = await res.json();
+
+        // Zutaten-Namen extrahieren
+        const arr = data.zutaten || [];
+        const names = arr
+          .map(z => (z.name || "").trim())
+          .filter(n => n.length > 0);
+
+        // Duplikate entfernen und sortieren
+        alleZutaten = [...new Set(names)].sort((a, b) => a.localeCompare(b, "de"));
+
+      }
+      catch (e) // Fehlerbehandlung
+      {
+        console.error("Zutaten laden fehlgeschlagen:", e);
+        alleZutaten = [];
+      }
+    }
+
+
+
+    // ----------------------------------------------------
+    // Befüllt ein Select-Feld mit Zutaten und setzt Auswah
+    // ----------------------------------------------------
+    function fuelleZutatenSelect(selectEl, selectedName)
+    {
+      selectEl.innerHTML = "";
+
+      // Platzhalter
+      const opt0 = document.createElement("option");
+      opt0.value = "";
+      opt0.textContent = "-- Zutat wählen --";
+      selectEl.appendChild(opt0);
+
+      // Optionen aus products.json
+      for (const name of alleZutaten) {
+        const opt = document.createElement("option");
+        opt.value = name;
+        opt.textContent = name;
+        selectEl.appendChild(opt);
+      }
+
+      // Auswahl setzen (falls vorhandene Zutat im Rezept)
+      if (selectedName && alleZutaten.includes(selectedName))
+      {
+        selectEl.value = selectedName;
+      }
+      else if (selectedName)
+      {
+        // falls Rezept Zutat enthält die nicht in products.json ist:
+        const optX = document.createElement("option");
+        optX.value = selectedName;
+        optX.textContent = selectedName + " (nicht in products)";
+        selectEl.insertBefore(optX, selectEl.children[1]);
+        selectEl.value = selectedName;
+      }
+    }
 
 
 
@@ -252,7 +329,6 @@
     {
       window._editMode = false;
       openPopup((recipe) => {
-        console.log("Neues Rezept erstellt:", recipe);
         speichereRezept(recipe);
       });
     }
@@ -270,7 +346,6 @@
       aktuellesRezept = rezept;                 // für löschen merken
 
       openPopup((updatedRecipe) => {
-        console.log("Rezept bearbeitet:", updatedRecipe);
         speichereRezept(updatedRecipe);
       });
 
@@ -292,27 +367,34 @@
 
         div.innerHTML = `
           <label>Name:</label>
-          <input type="text" class="zName" value="${zutat.name}">
+          <select class="zName zSelect" size="3"></select>
 
           <hr class="linebreak">
 
           <label>ml 1:</label>
-          <input type="number" max="99" min="0" class="zMl1 ml-small" value="${(zutat.ml && zutat.ml[0] != null) ? zutat.ml[0] : 0}">
+          <input type="number" max="99" min="0" class="zMl1 ml-small"
+                value="${(zutat.ml && zutat.ml[0] != null) ? zutat.ml[0] : 0}">
 
           <label>ml 2:</label>
-          <input type="number" max="99" min="0" class="zMl2 ml-small" value="${(zutat.ml && zutat.ml[1] != null) ? zutat.ml[1] : 0}">
+          <input type="number" max="99" min="0" class="zMl2 ml-small"
+                value="${(zutat.ml && zutat.ml[1] != null) ? zutat.ml[1] : 0}">
 
           <button class="removeZutat">X</button>
           <hr>
         `;
 
+
+        // ✅ HIER hinzufügen:
+        const sel = div.querySelector(".zName");
+        fuelleZutatenSelect(sel, zutat.name);
+
         div.querySelector(".removeZutat").onclick = () => {
           div.remove();
           updateZutatenScroll();
         };
+
         container.appendChild(div);
       });
-
       updateZutatenScroll();
     }
 
@@ -443,7 +525,13 @@
         document.getElementById("rGroup").value = "";
         document.getElementById("rColor").value = "";
         document.getElementById("rComment").value = "";
-        document.getElementById("zutatenContainer").innerHTML = "";
+        document.getElementById("zutatenContainer").innerHTML = "";   // ✅ wichtig
+        aktuellesRezept = null;                                      // ✅ optional aber sauber
+
+        // direkt eine Zutat-Zeile anlegen
+        document.getElementById("addZutat").click();
+
+
       }
 
       document.getElementById("popup").classList.remove("hidden");
@@ -481,6 +569,8 @@
     function closePopup()
     {
       document.getElementById("popup").classList.add("hidden");
+      window._editMode = false;
+      aktuellesRezept = null;
     }
 
 
@@ -519,36 +609,43 @@
     //  Zutaten hinzufügen
     // ----------------------------------------------------
     document.getElementById("addZutat").onclick = () => {
-      const container = document.getElementById("zutatenContainer");
+    const container = document.getElementById("zutatenContainer");
 
-      const div = document.createElement("div");
-      div.classList.add("zutat");
+    const div = document.createElement("div");
+    div.classList.add("zutat");
 
-      div.innerHTML = `
-        <label>Name:</label>
-        <input type="text" class="zName">
-        
-        <hr class="linebreak">
+    div.innerHTML = `
+      <label>Name:</label>
+      <select class="zName zSelect" size="3"></select>
 
-        <label>ml 1:</label>
-        <input type="number" max="99" min="0" class="zMl1 ml-small" placeholder="15" value="0">
+      <hr class="linebreak">
 
-        <label>ml 2:</label>
-        <input type="number" max="99" min="0" class="zMl2 ml-small" placeholder="0" value="0">
+      <label>ml 1:</label>
+      <input type="number" max="99" min="0"
+            class="zMl1 ml-small"
+            value="0">
 
-        <button class="removeZutat">X</button>
-        <hr>
-      `;
+      <label>ml 2:</label>
+      <input type="number" max="99" min="0"
+            class="zMl2 ml-small"
+            value="0">
 
-      div.querySelector(".removeZutat").onclick = () => {
-        div.remove();
-        updateZutatenScroll();
-      };
-      container.appendChild(div);
+      <button class="removeZutat">X</button>
+      <hr>
+    `;
 
-      // nach dem Hinzufügen Scrollzustand prüfen
+    // 🔹 HIER: Select erstmal leer/mit Platzhalter füllen
+    const sel = div.querySelector(".zName");
+    fuelleZutatenSelect(sel, "");
+
+    div.querySelector(".removeZutat").onclick = () => {
+      div.remove();
       updateZutatenScroll();
     };
+
+    container.appendChild(div);
+    updateZutatenScroll();
+  };
 
 
 
@@ -573,8 +670,12 @@
         const ml1 = Number(div.querySelector(".zMl1")?.value ?? 0);
         const ml2 = Number(div.querySelector(".zMl2")?.value ?? 0);
 
-        recipe.zutaten.push({ name, ml: [ml1, ml2] });
+        if (name.trim().length > 0) {
+          recipe.zutaten.push({ name, ml: [ml1, ml2] });
+        }
       });
+
+
 
       // Hilfstext Ausgabe auf der Seite (Optional)
       /*document.getElementById("output").textContent =
@@ -595,7 +696,11 @@
     };
 
     // Beim Laden der Seite automatisch starten
-    document.addEventListener('DOMContentLoaded', ladeRezepte);
+    document.addEventListener('DOMContentLoaded', async () => {
+      await ladeZutatenAusProducts();
+      ladeRezepte();
+    });
+
   </script>
 </body>
 </html>
