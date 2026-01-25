@@ -51,9 +51,22 @@
     .rezept {
       background: #2c3e50;
       border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
       padding: 1rem;
+      padding-left: 20px;           /* Platz für Farbstreifen */
       transition: transform 0.2s;
+      position: relative;
+      overflow: hidden;             /* wichtig: Streifen + Radius sauber */
+    }
+
+    .rezept::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 10px;
+      background: var(--rColor, #666);
     }
 
     .rezept:hover { transform: scale(1.03); }
@@ -130,6 +143,23 @@
     .zSelect {
       width: 180px;      /* nach Geschmack */
     }
+
+    .zutaten span.zutat-missing {
+      background: #b00020;   /* rot */
+      color: #fff;
+    }
+
+    .color-select{
+    width: 180px;
+    padding-left: 28px; /* Platz für Farbbalken */
+    border-radius: 6px;
+    height: 28px;
+
+    /* Farbbalken innen links (per CSS-Variable gesetzt) */
+    background-image: linear-gradient(to right, var(--selColor, #666) 0 18px, #fff 18px 100%);
+    background-repeat: no-repeat;
+  }
+
   </style>
 </head>
 <body>
@@ -167,7 +197,9 @@
           </tr>
            <tr>
             <th><label>Farbe:</label></th>
-            <th><input id="rColor" type="number"></th>
+            <th>
+              <select id="rColor" class="color-select"></select>
+            </th>
           </tr>
            <tr>
             <th><label>Kommentar:</label></th>
@@ -196,12 +228,62 @@
     let aktuellesRezept = null;
     let alleZutaten = [];
 
+    // 12 Farbcodes
+    const FARBCODES = [
+      "#ffa500",   // Color_0
+      "#daff00",   // Color_1
+      "#A1FF00",   // Color_2
+      "#00ff25",   // Color_3
+      "#00ffa5",   // Color_4
+      "#00daff",   // Color_5
+      "#005aff",   // Color_6
+      "#2500ff",   // Color_7
+      "#a500ff",   // Color_8
+      "#ff00d9",   // Color_9
+      "#ff005a",   // Color_10
+      "#ff2500"    // Color_11
+    ];
+
+
+
+    // ----------------------------------------------------
+    // Initialisiert die Farbauswahl (rColor)
+    // ----------------------------------------------------
+    function initColorSelect()
+    {
+      const sel = document.getElementById("rColor");
+      if (!sel) return;
+
+      sel.innerHTML = "";
+
+      FARBCODES.forEach((hex, idx) => {
+        const opt = document.createElement("option");
+        opt.value = String(idx);
+        opt.textContent = `Farbe ${idx} (${hex})`;
+        sel.appendChild(opt);
+      });
+
+      const updateStripe = () => {
+        const i = Number(sel.value) || 0;
+        sel.style.setProperty("--selColor", FARBCODES[i] || "#666");
+      };
+
+      sel.addEventListener("change", updateStripe);
+
+      // Default
+      sel.value = "0";
+      updateStripe();
+    }
+
+
+
     // ----------------------------------------------------
     // Lädt und sammelt eindeutige Zutaten aus products.json
     // ----------------------------------------------------
     async function ladeZutatenAusProducts()
     {
-      try {
+      try
+      {
         // JSON-Datei laden (ohne Cache)
         const url = "/products/products.json";
         const res = await fetch(url, { cache: "no-store" });
@@ -355,6 +437,7 @@
       document.getElementById("rPlu").value = rezept.plu;
       document.getElementById("rGroup").value = rezept.group;
       document.getElementById("rColor").value = rezept.color;
+      document.getElementById("rColor").style.setProperty("--selColor", FARBCODES[rezept.color] || "#666");
       document.getElementById("rComment").value = rezept.comment;
 
       // --- Zutaten setzen ---
@@ -383,8 +466,6 @@
           <hr>
         `;
 
-
-        // ✅ HIER hinzufügen:
         const sel = div.querySelector(".zName");
         fuelleZutatenSelect(sel, zutat.name);
 
@@ -464,19 +545,31 @@
     function erzeugeRezeptHTML(rezept)
     {
       const zutatenHTML = rezept.zutaten
-        //.filter(z => (z.ml?.[0] || 0) > 0 || (z.ml?.[1] || 0) > 0)
-        .map(z => `<span>${z.name}</span>`)
+        .filter(z =>
+          (Number(z.ml?.[0] ?? 0) > 0) ||
+          (Number(z.ml?.[1] ?? 0) > 0)
+        )
+        .map(z => {
+          const name = (z.name || "").trim();
+          const isMissing = !alleZutaten.includes(name);
+          const cls = isMissing ? "zutat-missing" : "";
+          return `<span class="${cls}">${name}</span>`;
+        })
         .join('');
 
-      // Rezept als JSON im data-Attribut speichern
       const rezeptJson = encodeURIComponent(JSON.stringify(rezept));
 
+      const colorIdx = Number(rezept.color ?? 0);
+      const hex = FARBCODES[colorIdx] || "#666";
+
       return `
-        <div class="rezept" style="color:white"
+        <div class="rezept" style="color:white; --rColor: ${hex};"
             onclick="bearbeiteRezept(decodeURIComponent('${rezeptJson}'))">
           <h2>${rezept.name}</h2>
           <p>${rezept.comment || ''}</p>
-          <div class="zutaten">${zutatenHTML}</div>
+          <div class="zutaten">
+            ${zutatenHTML || '<span style="opacity:.6">Keine Zutaten</span>'}
+          </div>
         </div>
       `;
     }
@@ -523,15 +616,14 @@
         document.getElementById("rUse").value = "";
         document.getElementById("rPlu").value = "";
         document.getElementById("rGroup").value = "";
-        document.getElementById("rColor").value = "";
+        document.getElementById("rColor").value = "0";
+        document.getElementById("rColor").style.setProperty("--selColor", FARBCODES[0] || "#666");
         document.getElementById("rComment").value = "";
-        document.getElementById("zutatenContainer").innerHTML = "";   // ✅ wichtig
-        aktuellesRezept = null;                                      // ✅ optional aber sauber
+        document.getElementById("zutatenContainer").innerHTML = "";   
+        aktuellesRezept = null;                                      
 
         // direkt eine Zutat-Zeile anlegen
         document.getElementById("addZutat").click();
-
-
       }
 
       document.getElementById("popup").classList.remove("hidden");
@@ -609,12 +701,12 @@
     //  Zutaten hinzufügen
     // ----------------------------------------------------
     document.getElementById("addZutat").onclick = () => {
-    const container = document.getElementById("zutatenContainer");
+      const container = document.getElementById("zutatenContainer");
 
-    const div = document.createElement("div");
-    div.classList.add("zutat");
+      const div = document.createElement("div");
+      div.classList.add("zutat");
 
-    div.innerHTML = `
+      div.innerHTML = `
       <label>Name:</label>
       <select class="zName zSelect" size="3"></select>
 
@@ -634,7 +726,7 @@
       <hr>
     `;
 
-    // 🔹 HIER: Select erstmal leer/mit Platzhalter füllen
+    // Select erstmal leer/mit Platzhalter füllen
     const sel = div.querySelector(".zName");
     fuelleZutatenSelect(sel, "");
 
@@ -670,18 +762,18 @@
         const ml1 = Number(div.querySelector(".zMl1")?.value ?? 0);
         const ml2 = Number(div.querySelector(".zMl2")?.value ?? 0);
 
-        if (name.trim().length > 0) {
+        const hasMl = (ml1 > 0) || (ml2 > 0);
+
+        if (name.trim().length > 0 && hasMl) 
+        {
           recipe.zutaten.push({ name, ml: [ml1, ml2] });
         }
       });
-
-
 
       // Hilfstext Ausgabe auf der Seite (Optional)
       /*document.getElementById("output").textContent =
           JSON.stringify(recipe, null, 4);*/
           
-
       // Wenn ein Callback existiert → ausführen
       if (typeof window._popupCallback === "function")
       {
@@ -697,6 +789,7 @@
 
     // Beim Laden der Seite automatisch starten
     document.addEventListener('DOMContentLoaded', async () => {
+      initColorSelect();
       await ladeZutatenAusProducts();
       ladeRezepte();
     });
