@@ -81,6 +81,17 @@
       font-size: 0.8rem;
     }
 
+    .useIcon{
+      position:absolute;
+      top:10px;
+      right:10px;
+      width:22px;
+      height:22px;
+      cursor:pointer;
+      opacity:0.9;
+    }
+    .useIcon:hover{ opacity:1; }
+
     .hinweis {
       text-align: center;
       color: #888;
@@ -224,6 +235,9 @@
   <pre id="output"></pre>
 
   <script>
+    const ICON_VISIBLE = "/web/pictures/Aktionsbilder/sichtbar.png";
+    const ICON_HIDDEN  = "/web/pictures/Aktionsbilder/unsichtbar.png";
+    
     const rezeptOrdner = '/rezepte/';
     let aktuellesRezept = null;
     let alleZutaten = [];
@@ -562,9 +576,20 @@
       const colorIdx = Number(rezept.color ?? 0);
       const hex = FARBCODES[colorIdx] || "#666";
 
+      // use + icon pro Rezept berechnen
+      const useVal = Number(rezept.use ?? 0);                 // 0 sichtbar, 1 nicht sichtbar
+      const iconSrc = (useVal === 1) ? ICON_HIDDEN : ICON_VISIBLE;
+
       return `
         <div class="rezept" style="color:white; --rColor: ${hex};"
             onclick="bearbeiteRezept(decodeURIComponent('${rezeptJson}'))">
+
+          <img class="useIcon"
+              src="${iconSrc}"
+              data-use="${useVal}"
+              onclick="toggleUse(event, this, decodeURIComponent('${rezeptJson}'))"
+              alt="use">
+
           <h2>${rezept.name}</h2>
           <p>${rezept.comment || ''}</p>
           <div class="zutaten">
@@ -724,20 +749,79 @@
 
       <button class="removeZutat">X</button>
       <hr>
-    `;
+      `;
 
-    // Select erstmal leer/mit Platzhalter füllen
-    const sel = div.querySelector(".zName");
-    fuelleZutatenSelect(sel, "");
+      // Select erstmal leer/mit Platzhalter füllen
+      const sel = div.querySelector(".zName");
+      fuelleZutatenSelect(sel, "");
 
-    div.querySelector(".removeZutat").onclick = () => {
-      div.remove();
+      div.querySelector(".removeZutat").onclick = () => {
+        div.remove();
+        updateZutatenScroll();
+      };
+
+      container.appendChild(div);
       updateZutatenScroll();
     };
 
-    container.appendChild(div);
-    updateZutatenScroll();
-  };
+
+
+    // ----------------------------------------------------
+    //  ...
+    // ----------------------------------------------------
+    async function saveRecipeSilent(recipe)
+    {
+      const res = await fetch("/saveRecipe", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: "body=" + encodeURIComponent(JSON.stringify(recipe))
+      });
+      if (!res.ok) throw new Error("Save failed: " + res.status);
+      return await res.text();
+    }
+
+
+
+    // ----------------------------------------------------
+    //  Klick auf Icon: use toggeln, Icon wechseln, speichern (ohne Seite neu zu laden)
+    // ----------------------------------------------------
+    async function toggleUse(ev, imgEl, rezeptString)
+    {
+      ev.stopPropagation(); // verhindert "Card klick" => bearbeiten
+
+      let rezept;
+      try
+      {
+        rezept = JSON.parse(rezeptString);
+      }
+      catch (e)
+      {
+        console.error("Bad rezept json:", e);
+        return;
+      }
+
+      // toggle: 0 sichtbar, 1 nicht sichtbar
+      rezept.use = (Number(rezept.use ?? 0) === 1) ? 0 : 1;
+
+      // UI sofort updaten
+      imgEl.dataset.use = String(rezept.use);
+      imgEl.src = (rezept.use === 1) ? ICON_HIDDEN : ICON_VISIBLE;
+
+      // speichern (ohne reload)
+      try
+      {
+        await saveRecipeSilent(rezept);
+      }
+      catch (e)
+      {
+        console.error(e);
+        // rollback, falls speichern fehlschlägt
+        rezept.use = (rezept.use === 1) ? 0 : 1;
+        imgEl.dataset.use = String(rezept.use);
+        imgEl.src = (rezept.use === 1) ? ICON_HIDDEN : ICON_VISIBLE;
+        alert("Konnte 'use' nicht speichern!");
+      }
+    }
 
 
 
