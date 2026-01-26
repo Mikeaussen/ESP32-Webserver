@@ -6,13 +6,13 @@
   <style>
     body {
       font-family: "Segoe UI", Arial, sans-serif;
-      background-color: #05203F;
+      background-color: #231E45;
       margin: 0;
       padding: 0;
     }
 
     header {
-      background: #05203F;
+      background: #231E45;
       color: white;
       padding: 1rem;
       text-align: center;
@@ -141,7 +141,7 @@
     }
 
     .ml-small {
-      width: 2.5em;
+      width: 3em;
       text-align: center;
     }
 
@@ -171,6 +171,14 @@
     background-repeat: no-repeat;
   }
 
+  .popup-field {
+  width: 180px;
+  padding-left: 28px;   /* Platz für Icon / Farbbalken */
+  border-radius: 6px;
+  height: 28px;
+  box-sizing: border-box;
+}
+
   </style>
 </head>
 <body>
@@ -192,19 +200,24 @@
         <table>
           <tr>
             <th><label>Name:</label></th>
-            <th><input id="rName" type="text"></th>
+            <th><input id="rName" type="text" class="popup-field"></th>
           </tr>
            <tr>
-            <th><label>Use:</label></th>
-            <th><input id="rUse" type="number"></th>
+            <th><label>Sichtbarkeit:</label></th>
+            <th>
+              <select id="rUse" style="width:180px;height:28px;border-radius:6px;" class="popup-field">
+                <option value="0">Sichtbar</option>
+                <option value="1">Nicht sichtbar</option>
+              </select>
+            </th>
           </tr>
-           <tr>
+          <tr>
             <th><label>PLU:</label></th>
-            <th><input id="rPlu" type="text"></th>
+            <th><input id="rPlu" type="text" class="popup-field"></th>
           </tr>
            <tr>
             <th><label>Gruppe:</label></th>
-            <th><input id="rGroup" type="number"></th>
+            <th><input id="rGroup" type="number" class="popup-field"></th>
           </tr>
            <tr>
             <th><label>Farbe:</label></th>
@@ -214,7 +227,7 @@
           </tr>
            <tr>
             <th><label>Kommentar:</label></th>
-            <th><input id="rComment" type="text"></th>
+            <th><input id="rComment" type="text" class="popup-field"></th>
           </tr>
         </table>
        
@@ -447,7 +460,7 @@
 
       // --- Felder befüllen ---
       document.getElementById("rName").value = rezept.name;
-      document.getElementById("rUse").value = rezept.use;
+      document.getElementById("rUse").value = String(Number(rezept.use ?? 0));
       document.getElementById("rPlu").value = rezept.plu;
       document.getElementById("rGroup").value = rezept.group;
       document.getElementById("rColor").value = rezept.color;
@@ -469,11 +482,11 @@
           <hr class="linebreak">
 
           <label>ml 1:</label>
-          <input type="number" max="99" min="0" class="zMl1 ml-small"
+          <input type="number" max="400" min="0" step="5" class="zMl1 ml-small"
                 value="${(zutat.ml && zutat.ml[0] != null) ? zutat.ml[0] : 0}">
 
           <label>ml 2:</label>
-          <input type="number" max="99" min="0" class="zMl2 ml-small"
+          <input type="number" max="400" min="0" step="5" class="zMl2 ml-small"
                 value="${(zutat.ml && zutat.ml[1] != null) ? zutat.ml[1] : 0}">
 
           <button class="removeZutat">X</button>
@@ -581,22 +594,24 @@
       const iconSrc = (useVal === 1) ? ICON_HIDDEN : ICON_VISIBLE;
 
       return `
-        <div class="rezept" style="color:white; --rColor: ${hex};"
-            onclick="bearbeiteRezept(decodeURIComponent('${rezeptJson}'))">
+      <div class="rezept"
+          style="color:white; --rColor: ${hex};"
+          data-recipe="${rezeptJson}"
+          onclick="bearbeiteRezept(decodeURIComponent(this.dataset.recipe))">
 
-          <img class="useIcon"
-              src="${iconSrc}"
-              data-use="${useVal}"
-              onclick="toggleUse(event, this, decodeURIComponent('${rezeptJson}'))"
-              alt="use">
+        <img class="useIcon"
+            src="${iconSrc}"
+            data-use="${useVal}"
+            onclick="toggleUse(event, this)"
+            alt="use">
 
-          <h2>${rezept.name}</h2>
-          <p>${rezept.comment || ''}</p>
-          <div class="zutaten">
-            ${zutatenHTML || '<span style="opacity:.6">Keine Zutaten</span>'}
-          </div>
+        <h2>${rezept.name}</h2>
+        <p>${rezept.comment || ''}</p>
+        <div class="zutaten">
+          ${zutatenHTML || '<span style="opacity:.6">Keine Zutaten</span>'}
         </div>
-      `;
+      </div>
+    `;
     }
 
 
@@ -638,7 +653,7 @@
         deleteBtn.style.display = "none";
 
         document.getElementById("rName").value = "";
-        document.getElementById("rUse").value = "";
+        document.getElementById("rUse").value = "0";
         document.getElementById("rPlu").value = "";
         document.getElementById("rGroup").value = "";
         document.getElementById("rColor").value = "0";
@@ -738,14 +753,10 @@
       <hr class="linebreak">
 
       <label>ml 1:</label>
-      <input type="number" max="99" min="0"
-            class="zMl1 ml-small"
-            value="0">
+      <input type="number" max="400" min="0" step="5" class="zMl1 ml-small" value="0">
 
       <label>ml 2:</label>
-      <input type="number" max="99" min="0"
-            class="zMl2 ml-small"
-            value="0">
+      <input type="number" max="400" min="0" step="5" class="zMl2 ml-small" value="0">
 
       <button class="removeZutat">X</button>
       <hr>
@@ -767,7 +778,7 @@
 
 
     // ----------------------------------------------------
-    //  ...
+    //  Speichert ein Rezept asynchron im Hintergrund (ohne die Seite neu zu laden)
     // ----------------------------------------------------
     async function saveRecipeSilent(recipe)
     {
@@ -785,14 +796,18 @@
     // ----------------------------------------------------
     //  Klick auf Icon: use toggeln, Icon wechseln, speichern (ohne Seite neu zu laden)
     // ----------------------------------------------------
-    async function toggleUse(ev, imgEl, rezeptString)
+    async function toggleUse(ev, imgEl)
     {
       ev.stopPropagation(); // verhindert "Card klick" => bearbeiten
 
+      const card = imgEl.closest(".rezept");
+      if (!card) return;
+
+      // immer aktuellen JSON aus der Card holen
       let rezept;
       try
       {
-        rezept = JSON.parse(rezeptString);
+        rezept = JSON.parse(decodeURIComponent(card.dataset.recipe));
       }
       catch (e)
       {
@@ -800,12 +815,15 @@
         return;
       }
 
-      // toggle: 0 sichtbar, 1 nicht sichtbar
+      // toggle anhand des aktuellen Zustands
       rezept.use = (Number(rezept.use ?? 0) === 1) ? 0 : 1;
 
       // UI sofort updaten
       imgEl.dataset.use = String(rezept.use);
       imgEl.src = (rezept.use === 1) ? ICON_HIDDEN : ICON_VISIBLE;
+
+      // Card-JSON aktualisieren, damit der nächste Klick den neuen Stand kennt
+      card.dataset.recipe = encodeURIComponent(JSON.stringify(rezept));
 
       // speichern (ohne reload)
       try
@@ -815,10 +833,13 @@
       catch (e)
       {
         console.error(e);
+
         // rollback, falls speichern fehlschlägt
         rezept.use = (rezept.use === 1) ? 0 : 1;
         imgEl.dataset.use = String(rezept.use);
         imgEl.src = (rezept.use === 1) ? ICON_HIDDEN : ICON_VISIBLE;
+        card.dataset.recipe = encodeURIComponent(JSON.stringify(rezept));
+
         alert("Konnte 'use' nicht speichern!");
       }
     }
