@@ -152,47 +152,54 @@ void configureWebServer()
     // --- Speichern eines Rezeptes (RAW JSON) ---
   server.on("/saveRecipe", HTTP_POST, [](AsyncWebServerRequest *request)
   {
-    // JSON aus dem Body holen
-    if (request->hasParam("body", true))
-    {
-      String body = request->getParam("body", true)->value();
-
-      Serial.println("=== Kompletter JSON Body ===");
-      Serial.println(body);
-      Serial.println("===========================");
-
-      // Name aus JSON holen
-      int pos1 = body.indexOf("\"name\"");
-      int pos2 = body.indexOf(":", pos1);
-      int pos3 = body.indexOf("\"", pos2 + 1);
-      int pos4 = body.indexOf("\"", pos3 + 1);
-
-      if (pos1 < 0 || pos2 < 0 || pos3 < 0 || pos4 < 0)
-      {
-        request->send(400, "text/plain", "JSON ohne name");
-        return;
-      }
-
-      String name = body.substring(pos3 + 1, pos4);
-      name.replace(" ", "_");
-
-      String path = "/rezepte/" + name + ".json";
-      File file = FILESYSTEM.open(path, FILE_WRITE);
-      if (!file)
-      {
-        request->send(500, "text/plain", "Fehler Datei öffnen");
-        return;
-      }
-
-      file.print(body);
-      file.close();
-
-      request->send(200, "text/plain", "Gespeichert: " + path);
-    }
-    else
+    if (!request->hasParam("body", true))
     {
       request->send(400, "text/plain", "Kein Body empfangen");
+      return;
     }
+
+    String body = request->getParam("body", true)->value();
+
+    // Name aus JSON extrahieren
+    int pos1 = body.indexOf("\"name\"");
+    int pos2 = body.indexOf(":", pos1);
+    int pos3 = body.indexOf("\"", pos2 + 1);
+    int pos4 = body.indexOf("\"", pos3 + 1);
+
+    if (pos1 < 0 || pos2 < 0 || pos3 < 0 || pos4 < 0)
+    {
+      request->send(400, "text/plain", "JSON ohne name");
+      return;
+    }
+
+    String name = body.substring(pos3 + 1, pos4);
+
+    // Dateiname absichern
+    name.replace(" ", "_");
+    name.replace("/", "_");
+    name.replace("\\", "_");
+    name.replace("..", "_");
+
+    String path = "/rezepte/" + name + ".json";
+
+    // vorhandene Datei löschen
+    if (FILESYSTEM.exists(path))
+    {
+      FILESYSTEM.remove(path);
+    }
+
+    // Datei NEU anlegen und schreiben
+    File file = FILESYSTEM.open(path, FILE_WRITE);
+    if (!file)
+    {
+      request->send(500, "text/plain", "Fehler Datei öffnen");
+      return;
+    }
+
+    file.print(body);
+    file.close();
+
+    request->send(200, "text/plain", "Gespeichert: " + path);
   });
 
   // --- Löschen eines Rezeptes (RAW JSON als Form-Param "body") ---
