@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kanalzuordnung</title>
+  <style>
+    :root{
+      --bg:#0b1220;
+      --text:#e8eefc;
+      --muted:#a9b6d6;
+      --accent:#43b2ff;
+      --danger:#ff4b4b;
+      --ok:#2ee59d;
+      --warn:#ffcc66;
+    }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: radial-gradient(1200px 600px at 20% 0%, #122043 0%, var(--bg) 55%),
+                  radial-gradient(900px 500px at 90% 20%, #0f1c33 0%, var(--bg) 60%);
+      color:var(--text);
+    }
+    .wrap{ max-width: 980px; margin: 24px auto; padding: 16px; }
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 16px 50px rgba(0,0,0,0.35);
+    }
+
+    .topbar{
+      display:flex; align-items:center; gap:12px;
+      padding: 18px 18px;
+      background: linear-gradient(90deg, rgba(67,178,255,0.18), rgba(67,178,255,0.06));
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .icon{
+      width: 14px; height: 14px; border-radius: 3px;
+      background: linear-gradient(180deg, rgba(67,178,255,0.9), rgba(67,178,255,0.35));
+      position: relative;
+    }
+    .icon:before, .icon:after{
+      content:""; position:absolute; bottom:2px; width:3px;
+      background: rgba(11,18,32,0.9); border-radius:2px;
+    }
+    .icon:before{ left:3px; height:7px;}
+    .icon:after{ left:8px; height:10px;}
+    h1{ margin:0; font-weight: 750; letter-spacing: .2px; color: var(--accent); font-size: 30px; }
+
+    .section{
+      padding: 14px 14px 18px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .section:first-of-type{ border-top:none; }
+
+    .sectionTitle{
+      margin: 4px 4px 12px;
+      font-size: 14px;
+      letter-spacing: .3px;
+      color: var(--muted);
+      font-weight: 750;
+      text-transform: uppercase;
+    }
+
+    .table{ width:100%; border-collapse: collapse; table-layout: fixed; }
+    .thead{ background: rgba(255,255,255,0.03); }
+    th, td{
+      padding: 14px 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      font-size: 15px;
+    }
+    th{ text-align:left; color: var(--muted); font-weight: 700; }
+
+    .col-id{ width: 110px; }
+    .col-nr{ width: 90px; }
+    .col-prod{ width: auto; }
+    .col-k{ width: 140px; }
+    .col-t{ width: 140px; }
+
+    .row{ background: rgba(10,16,30,0.12); }
+    .row:nth-child(even){ background: rgba(10,16,30,0.22); }
+
+    .idcell{
+      padding: 0;
+      vertical-align: top;
+      border-right: 1px solid rgba(255,255,255,0.06);
+      background: linear-gradient(180deg, rgba(255,75,75,0.85), rgba(255,75,75,0.55));
+      position: relative;
+    }
+    .idlabel{
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-weight: 800;
+      letter-spacing: .4px;
+      color: rgba(11,18,32,0.95);
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .nr{ color: var(--accent); font-weight: 850; font-size: 18px; }
+    .prod{ display:flex; align-items:center; gap:10px; font-weight: 650; }
+    .dot{
+      width:10px;height:10px;border-radius:999px;
+      background: var(--warn);
+      box-shadow: 0 0 0 3px rgba(255,204,102,0.12);
+      flex: 0 0 auto;
+    }
+    .dot.ok{
+      background: var(--ok);
+      box-shadow: 0 0 0 3px rgba(46,229,157,0.12);
+    }
+    .dot.bad{
+      background: rgba(255,75,75,0.95);
+      box-shadow: 0 0 0 3px rgba(255,75,75,0.12);
+    }
+
+    .footer{
+      padding: 12px 14px;
+      color: var(--muted);
+      font-size: 13px;
+      display:flex;
+      justify-content: space-between;
+      gap: 10px;
+      background: rgba(255,255,255,0.02);
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .err{
+      padding: 14px;
+      color: #ffd2d2;
+      background: rgba(255,75,75,0.10);
+      border-top: 1px solid rgba(255,75,75,0.25);
+      display:none;
+    }
+    .err.show{ display:block; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="topbar">
+        <span class="icon" aria-hidden="true"></span>
+        <h1>Kanalzuordnung</h1>
+      </div>
+
+      <div id="content"></div>
+
+      <div class="footer">
+        <div>Quelle: <span style="color:#eaf2ff">products.json</span></div>
+        <div><span style="color:#eaf2ff">Hinweis:</span> Leere Namen werden als „—“ angezeigt.</div>
+      </div>
+
+      <div id="err" class="err" role="alert"></div>
+    </div>
+  </div>
+
+  <script>
+    const JSON_URL = "products/products.json";
+    const content = document.getElementById("content");
+    const errBox = document.getElementById("err");
+
+    let all = [];
+
+    function channelsForId(id)
+    {
+      const start = (id - 1) * 8 + 1;
+      const end = start + 7;
+      return { start, end };
+    }
+
+    function escapeHtml(s)
+    {
+      return String(s)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+    }
+
+    function availabilityDot(avlb)
+    {
+      if (typeof avlb !== "number") return "dot";
+      if (avlb <= 0) return "dot bad";
+      if (avlb < 200) return "dot";
+      return "dot ok";
+    }
+
+    function setError(msg)
+    {
+      errBox.textContent = msg;
+      errBox.classList.add("show");
+    }
+
+    function clearError()
+    {
+      errBox.textContent = "";
+      errBox.classList.remove("show");
+    }
+
+    function renderAll()
+    {
+      content.innerHTML = "";
+
+      [1,2,3].forEach(id => {
+        const { start, end } = channelsForId(id);
+
+        const section = document.createElement("div");
+        section.className = "section";
+
+        section.innerHTML = `
+          <div class="sectionTitle">ID ${id}</div>
+          <table class="table" aria-label="Kanalzuordnung ID ${id}">
+            <thead class="thead">
+              <tr>
+                <th class="col-id"> </th>
+                <th class="col-nr">Nr.</th>
+                <th class="col-prod">Produkt</th>
+                <th class="col-k">K Faktor</th>
+                <th class="col-t">Timeout</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-${id}"></tbody>
+          </table>
+        `;
+        content.appendChild(section);
+
+        const tbody = section.querySelector(`#tbody-${id}`);
+
+        // genau 8 Zeilen anzeigen (auch wenn ein Channel fehlt)
+        const rows = [];
+        for (let ch = start; ch <= end; ch++)
+        {
+          const item = all.find(z => z && Number(z.ch) === ch) || null;
+          rows.push({ ch, item });
+        }
+
+        rows.forEach((r, idx) => {
+          const item = r.item || {};
+          const name = (item.name && String(item.name).trim()) ? String(item.name).trim() : "—";
+          const factor = (item.factor ?? "—");
+          const tmout = (item.tmout ?? "—");
+          const avlb = (typeof item.avlb === "number") ? item.avlb : null;
+
+          const tr = document.createElement("tr");
+          tr.className = "row";
+
+          if (idx === 0){
+            const tdId = document.createElement("td");
+            tdId.className = "idcell col-id";
+            tdId.rowSpan = 8;
+
+            const label = document.createElement("div");
+            label.className = "idlabel";
+            label.textContent = "ID " + id;
+
+            tdId.appendChild(label);
+            tr.appendChild(tdId);
+          }
+
+          tr.innerHTML += `
+            <td class="col-nr"><span class="nr">${r.ch}</span></td>
+            <td class="col-prod">
+              <div class="prod">
+                <span class="${availabilityDot(avlb)}" title="avlb: ${avlb === null ? "—" : avlb}"></span>
+                <span>${escapeHtml(name)}</span>
+              </div>
+            </td>
+            <td class="col-k">${escapeHtml(factor)}</td>
+            <td class="col-t">${escapeHtml(tmout)}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      });
+    }
+
+    async function load()
+    {
+      clearError();
+      try{
+        const res = await fetch(JSON_URL, { cache: "no-store" });
+        if (!res.ok) throw new Error("HTTP " + res.status + " beim Laden von " + JSON_URL);
+        const json = await res.json();
+        if (!json || !Array.isArray(json.zutaten)) throw new Error("JSON hat nicht das erwartete Format: { zutaten: [...] }");
+
+        all = json.zutaten.slice().sort((a,b) => (a.ch ?? 0) - (b.ch ?? 0));
+        renderAll();
+      }
+      catch(e)
+      {
+        console.error(e);
+        setError(
+          "Konnte products.json nicht laden. " +
+          "Wenn die Datei lokal geöffnet wird, soll ein kleiner Webserver gestartet werden (z.B. " +
+          "im Ordner: `python -m http.server 8000` oder `npx serve`). " +
+          "Dann im Browser http://localhost:8000 öffnen. Fehler: " + e.message
+        );
+      }
+    }
+
+    load();
+  </script>
+</body>
+</html>
