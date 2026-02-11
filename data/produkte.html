@@ -75,7 +75,19 @@
     }
     th{ text-align:left; color: var(--muted); font-weight: 700; }
 
-    .col-id{ width: 110px; }
+    th.col-id{
+      padding: 6px 6px !important;
+      text-align: center;
+    }
+
+    td.idcell{
+      padding: 0 !important;
+    }
+
+    .col-id{
+      width: 34px;
+    }
+
     .col-nr{ width: 90px; }
     .col-prod{ width: auto; }
     .col-k{ width: 140px; }
@@ -85,23 +97,20 @@
     .row:nth-child(even){ background: rgba(10,16,30,0.22); }
 
     .idcell{
-      padding: 0;
-      vertical-align: top;
+      width: 45px;
+      min-width: 45px;
+      max-width: 45px;
+      padding: 0 !important;
+      vertical-align: middle;
+      text-align: center;
       border-right: 1px solid rgba(255,255,255,0.06);
       background: linear-gradient(180deg, rgba(255,75,75,0.85), rgba(255,75,75,0.55));
-      position: relative;
     }
+
     .idlabel{
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-weight: 800;
-      letter-spacing: .4px;
-      color: rgba(11,18,32,0.95);
-      text-transform: uppercase;
-      white-space: nowrap;
+      padding: 6px 0;
     }
+
     .nr{ color: var(--accent); font-weight: 850; font-size: 18px; }
     .prod{ display:flex; align-items:center; gap:10px; font-weight: 650; }
     .dot{
@@ -138,6 +147,35 @@
       display:none;
     }
     .err.show{ display:block; }
+
+    .status-col{
+      width: 14px;
+      padding: 0 6px;
+    }
+
+    .status{
+      width: 8px;
+      height: 34px;          /* Balkenhöhe pro Zeile */
+      border-radius: 3px;
+      display: block;
+    }
+
+    /* Zustände */
+    .status.ok {
+      background: #00ff88;
+    }
+
+    .status.low {
+      background: #ffc107;
+    }
+
+    .status.empty {
+      background: #ff3b3b;
+    }
+
+    .status.error {
+      background: #b84dff;
+    }
   </style>
 </head>
 <body>
@@ -165,6 +203,14 @@
     const errBox = document.getElementById("err");
 
     let all = [];
+
+    function availabilityBarClass(avlb)
+    {
+      if (typeof avlb !== "number") return "status error";
+      if (avlb <= 0) return "status empty";
+      if (avlb < 200) return "status low";
+      return "status ok";
+    }
 
     function channelsForId(id)
     {
@@ -216,9 +262,18 @@
         section.innerHTML = `
           <div class="sectionTitle">ID ${id}</div>
           <table class="table" aria-label="Kanalzuordnung ID ${id}">
-            <thead class="thead">
+            <colgroup>
+              <col class="col-id">
+              <col class="status-col">
+              <col class="col-nr">
+              <col class="col-prod">
+              <col class="col-k">
+              <col class="col-t">
+            </colgroup>
+            <thead>
               <tr>
-                <th class="col-id"> </th>
+                <th class="col-id">ID</th>
+                <th class="status-col"></th>
                 <th class="col-nr">Nr.</th>
                 <th class="col-prod">Produkt</th>
                 <th class="col-k">K Faktor</th>
@@ -234,6 +289,7 @@
 
         // genau 8 Zeilen anzeigen (auch wenn ein Channel fehlt)
         const rows = [];
+
         for (let ch = start; ch <= end; ch++)
         {
           const item = all.find(z => z && Number(z.ch) === ch) || null;
@@ -264,10 +320,11 @@
           }
 
           tr.innerHTML += `
+            <td class="status-col"><div class="${availabilityBarClass(avlb)}" title="avlb: ${avlb === null ? "—" : avlb}"></div></td>
             <td class="col-nr"><span class="nr">${r.ch}</span></td>
             <td class="col-prod">
               <div class="prod">
-                <span class="${availabilityDot(avlb)}" title="avlb: ${avlb === null ? "—" : avlb}"></span>
+                <span title="avlb: ${avlb === null ? "—" : avlb}"></span>
                 <span>${escapeHtml(name)}</span>
               </div>
             </td>
