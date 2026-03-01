@@ -101,6 +101,11 @@ void configureWebServer()
     request->send(FILESYSTEM, "/user/users.json", "application/json");
   });
 
+    server.on("/user/rols.json", HTTP_GET, [](AsyncWebServerRequest *request)
+  {
+    request->send(FILESYSTEM, "/user/rols.json", "application/json");
+  });
+
   server.on("/user/userHandler.js", HTTP_GET, [](AsyncWebServerRequest *request)
   {
     request->send(FILESYSTEM, "/user/userHandler.js", "application/json");
