@@ -4,7 +4,6 @@
 #include "SD.h"
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
-// Arduino.h
 
 #define FILESYSTEM SD
 #define USE_SD_CARD true
@@ -38,7 +37,7 @@ bool initFileSystem()
       Serial.println("SD OK"); return true;
     }
     Serial.println("SD FAIL");
-  } 
+  }
   else
   {
     Serial.println("Init FFat...");
@@ -58,14 +57,38 @@ void notFound(AsyncWebServerRequest *request)
 
 // ───────────────────── Webserver Setup ──────────────────────────────
 
+static String sanitizeFileBase(String s)
+{
+  s.replace("/", "_");
+  s.replace("\\", "_");
+  s.replace("..", "_");
+  s.replace(" ", "_");
+  s.replace(":", "_");
+  s.replace(";", "_");
+  s.replace("\"", "_");
+  s.replace("'", "_");
+  s.replace("|", "_");
+  s.replace("?", "_");
+  s.replace("*", "_");
+  s.replace("<", "_");
+  s.replace(">", "_");
+  return s;
+}
+
 void configureWebServer()
 {
   // Ordner sicherstellen
   if (!SD.exists("/rezepte"))
   {
-      SD.mkdir("/rezepte");
-      Serial.println("Ordner /rezepte angelegt.");
+    SD.mkdir("/rezepte");
+    Serial.println("Ordner /rezepte angelegt.");
   }
+
+  // user + web picture ordner
+  if (!SD.exists("/user")) SD.mkdir("/user");
+  if (!SD.exists("/web")) SD.mkdir("/web");
+  if (!SD.exists("/web/pictures")) SD.mkdir("/web/pictures");
+  if (!SD.exists("/web/pictures/Profile")) SD.mkdir("/web/pictures/Profile");
 
   // --- Login page ---
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
@@ -73,8 +96,8 @@ void configureWebServer()
     request->send(FILESYSTEM, "/login.html", "text/html");
   });
 
-  // --- Protected HTML pages served only after login ---
-  const char* htmlPages[] = 
+  // --- HTML pages ---
+  const char* htmlPages[] =
   {
     "/menu.html",
     "/dashboard.html",
@@ -95,35 +118,121 @@ void configureWebServer()
     });
   }
 
-  // --- Protected JSON/API Endpoints ---
+  // --- JSON Dateien laden ---
   server.on("/user/users.json", HTTP_GET, [](AsyncWebServerRequest *request)
   {
     request->send(FILESYSTEM, "/user/users.json", "application/json");
   });
 
-    server.on("/user/rols.json", HTTP_GET, [](AsyncWebServerRequest *request)
+  server.on("/user/rols.json", HTTP_GET, [](AsyncWebServerRequest *request)
   {
     request->send(FILESYSTEM, "/user/rols.json", "application/json");
   });
 
+  // JS korrekt ausliefern
   server.on("/user/userHandler.js", HTTP_GET, [](AsyncWebServerRequest *request)
   {
-    request->send(FILESYSTEM, "/user/userHandler.js", "application/json");
+    request->send(FILESYSTEM, "/user/userHandler.js", "application/javascript");
   });
+
+  // users.json speichern
+  // Erwartet x-www-form-urlencoded: body=<json>
+  server.on("/user/users.json", HTTP_POST, [](AsyncWebServerRequest *request)
+  {
+    if (!request->hasParam("body", true))
+    {
+      request->send(400, "text/plain", "Kein Body empfangen");
+      return;
+    }
+
+    String body = request->getParam("body", true)->value();
+
+    if (!FILESYSTEM.exists("/user")) FILESYSTEM.mkdir("/user");
+    if (FILESYSTEM.exists("/user/users.json")) FILESYSTEM.remove("/user/users.json");
+
+    File file = FILESYSTEM.open("/user/users.json", FILE_WRITE);
+    if (!file)
+    {
+      request->send(500, "text/plain", "Fehler Datei öffnen");
+      return;
+    }
+
+    file.print(body);
+    file.close();
+
+    request->send(200, "text/plain", "users.json gespeichert");
+  });
+
+  // Profilbild Upload (Antwort erst bei final-Chunk)
+  // POST /user/uploadProfileImage?base=profil_ADMIN
+  // multipart/form-data Feldname: file
+  server.on(
+    "/user/uploadProfileImage",
+    HTTP_POST,
+    [](AsyncWebServerRequest *request)
+    {
+      // Antwort kommt erst im final-Chunk (stabiler)
+    },
+    [](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final)
+    {
+      if (!FILESYSTEM.exists("/web")) FILESYSTEM.mkdir("/web");
+      if (!FILESYSTEM.exists("/web/pictures")) FILESYSTEM.mkdir("/web/pictures");
+      if (!FILESYSTEM.exists("/web/pictures/Profile")) FILESYSTEM.mkdir("/web/pictures/Profile");
+
+      String base = "profil_unknown";
+      if (request->hasParam("base"))
+      {
+        base = request->getParam("base")->value();
+      }
+      base = sanitizeFileBase(base);
+      if (base.length() == 0) base = "profil_unknown";
+
+      // ext aus filename, fallback jpg
+      String ext = ".jpg";
+      int dot = filename.lastIndexOf('.');
+      if (dot >= 0)
+      {
+        String e = filename.substring(dot);
+        e.toLowerCase();
+        if (e == ".jpg" || e == ".jpeg" || e == ".png" || e == ".webp") ext = e;
+      }
+
+      String path = "/web/pictures/Profile/" + base + ext;
+
+      if (index == 0)
+      {
+        if (FILESYSTEM.exists(path)) FILESYSTEM.remove(path);
+        request->_tempFile = FILESYSTEM.open(path, FILE_WRITE);
+        if (!request->_tempFile)
+        {
+          request->send(500, "text/plain", "Fehler: Bilddatei nicht schreibbar");
+          return;
+        }
+      }
+
+      if (request->_tempFile)
+      {
+        request->_tempFile.write(data, len);
+      }
+
+      if (final)
+      {
+        if (request->_tempFile) request->_tempFile.close();
+        request->send(200, "text/plain", "OK");
+      }
+    }
+  );
 
   server.on("/file", HTTP_GET, [](AsyncWebServerRequest *request)
   {
-    // File download/delete handler
     request->send(200, "text/plain", "File handler stub");
   });
 
-  // --- Serve static web assets (JS, CSS, Images) ---
+  // --- Static assets ---
   server.serveStatic("/web/", FILESYSTEM, "/web/");
-
-  // --- Serve products (Zutatenliste) ---
   server.serveStatic("/products/", FILESYSTEM, "/products/");
 
- // --- Liste aller Rezepte ---
+  // --- Liste aller Rezepte ---
   server.on("/rezepte/list", HTTP_GET, [](AsyncWebServerRequest *request)
   {
     File root = FILESYSTEM.open("/rezepte");
@@ -151,10 +260,9 @@ void configureWebServer()
     request->send(200, "application/json", json);
   });
 
-  // Statische Auslieferung des /rezepte Ordners (wichtig!)
   server.serveStatic("/rezepte/", FILESYSTEM, "/rezepte/");
 
-    // --- Speichern eines Rezeptes (RAW JSON) ---
+  // --- Speichern eines Rezeptes ---
   server.on("/saveRecipe", HTTP_POST, [](AsyncWebServerRequest *request)
   {
     if (!request->hasParam("body", true))
@@ -165,7 +273,6 @@ void configureWebServer()
 
     String body = request->getParam("body", true)->value();
 
-    // Name aus JSON extrahieren
     int pos1 = body.indexOf("\"name\"");
     int pos2 = body.indexOf(":", pos1);
     int pos3 = body.indexOf("\"", pos2 + 1);
@@ -179,7 +286,6 @@ void configureWebServer()
 
     String name = body.substring(pos3 + 1, pos4);
 
-    // Dateiname absichern
     name.replace(" ", "_");
     name.replace("/", "_");
     name.replace("\\", "_");
@@ -187,13 +293,11 @@ void configureWebServer()
 
     String path = "/rezepte/" + name + ".json";
 
-    // vorhandene Datei löschen
     if (FILESYSTEM.exists(path))
     {
       FILESYSTEM.remove(path);
     }
 
-    // Datei NEU anlegen und schreiben
     File file = FILESYSTEM.open(path, FILE_WRITE);
     if (!file)
     {
@@ -207,18 +311,13 @@ void configureWebServer()
     request->send(200, "text/plain", "Gespeichert: " + path);
   });
 
-  // --- Löschen eines Rezeptes (RAW JSON als Form-Param "body") ---
+  // --- Rezept löschen ---
   server.on("/deleteRecipe", HTTP_POST, [](AsyncWebServerRequest *request)
   {
     if (request->hasParam("body", true))
     {
       String body = request->getParam("body", true)->value();
 
-      Serial.println("=== Delete JSON Body ===");
-      Serial.println(body);
-      Serial.println("=======================");
-
-      // Name aus JSON holen
       int pos1 = body.indexOf("\"name\"");
       int pos2 = body.indexOf(":", pos1);
       int pos3 = body.indexOf("\"", pos2 + 1);
@@ -232,10 +331,7 @@ void configureWebServer()
 
       String name = body.substring(pos3 + 1, pos4);
 
-      // gleicher Dateiname wie beim Speichern
       name.replace(" ", "_");
-
-      // minimale Pfad-Sicherheit
       name.replace("/", "_");
       name.replace("\\", "_");
       name.replace("..", "_");
@@ -262,9 +358,7 @@ void configureWebServer()
     }
   });
 
-  // --- 404 handler ---
   server.onNotFound(notFound);
-
   server.begin();
   Serial.println("Webserver started");
 }
