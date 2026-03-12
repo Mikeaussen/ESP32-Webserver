@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>User Management</title>
+
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -10,24 +12,27 @@
       background: #1a2b3c;
       color: white;
     }
-    
-    h1 {
-      margin-bottom: 20px;
-    }
-    
+
+    h1 { margin-bottom: 20px; }
+
     .toolbar {
       margin-bottom: 15px;
-      display: flex;            
+      display: flex;
       justify-content: flex-end;
+      gap: 8px;
     }
 
     .toolbar button {
       padding: 8px 14px;
-      margin-left: 5px;
       border: none;
       border-radius: 5px;
       color: white;
       cursor: pointer;
+    }
+
+    .toolbar button:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
     }
 
     .btn-create { background-color: #28c76f; }
@@ -44,20 +49,10 @@
       padding: 12px;
       border-bottom: 1px solid #555;
       text-align: left;
+      vertical-align: middle;
     }
 
-    th {
-      background: #34495e;
-    }
-
-    .actions i {
-      font-size: 18px;
-      margin-right: 10px;
-      cursor: pointer;
-    }
-
-    .edit { color: #00cfe8; }
-    .delete { color: #ea5455; }
+    th { background: #34495e; }
     .active-icon { color: #28c76f; font-size: 18px; }
 
     .footer {
@@ -66,14 +61,7 @@
       color: #ccc;
     }
 
-    .profile-pic {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      object-fit: cover;
-    }
-
-    /* Modal-Fenster */
+    /* Modal */
     .modal {
       display: none;
       position: fixed;
@@ -87,109 +75,171 @@
 
     .modal-content {
       background: #2c3e50;
-      margin: 5% auto;
-      padding: 20px;
-      border-radius: 8px;
-      width: 700px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+      margin: 4vh auto;
+      padding: 16px 16px 14px 16px;
+      border-radius: 10px;
+      width: 760px;
+      max-width: 92vw;
+      max-height: 88vh;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.45);
     }
 
     .modal-header {
       font-weight: bold;
-      margin-bottom: 15px;
       font-size: 18px;
-    }
-
-    .modal input, .modal select {
-      width: 100%;
       margin-bottom: 10px;
-      padding: 6px;
-      border-radius: 4px;
-      border: 1px solid #555;
-      background: #1a2b3c;
-      color: white;
     }
 
-    .modal-buttons {
-      text-align: right;
-      margin-top: 15px;
+    .modal-body {
+      max-height: calc(88vh - 70px);
+      overflow: auto;
+      padding-right: 6px;
     }
 
-    .btn-cancel {
-      background: #ea5455;
-      color: white;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    .btn-save {
-      background: #28c76f;
-      color: white;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 4px;
-      cursor: pointer;
+    .image-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 14px;
+      margin: 10px 0 6px 0;
+      flex-wrap: wrap;
     }
 
     .modal-image {
-      width: 120px;
-      height: 120px;
+      width: 110px;
+      height: 110px;
       border-radius: 50%;
       object-fit: cover;
-      display: block;
-      margin: 0 auto 10px auto;
+      margin: 0;
+      background: #1a2b3c;
     }
 
     .btn-change-image {
-      display: block;
-      margin: 0 auto;           
       padding: 6px 12px;
       border: none;
-      border-radius: 4px;
+      border-radius: 6px;
       background: #00cfe8;
       color: white;
       cursor: pointer;
       font-size: 14px;
+      margin: 0;
+      white-space: nowrap;
+    }
+    .btn-change-image:hover { background: #0099b8; }
+    .btn-change-image:disabled { opacity: 0.65; cursor: not-allowed; }
+
+    #uploadStatus {
+      width: 100%;
+      text-align: center;
+      font-size: 13px;
+      color: #00cfe8;
+      margin: 6px 0 14px 0;
+      min-height: 16px;
+      white-space: pre-line;
     }
 
-    .btn-change-image:hover {
-      background: #0099b8;
+    .modal-grid {
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 26px;
+      align-items: start;
     }
 
-    /* Rechte-Checkboxen */
+    .modal label {
+      display: block;
+      margin: 10px 0 6px 0;
+      font-size: 14px;
+    }
+
+    .modal input[type="text"],
+    .modal select {
+      width: 320px;
+      max-width: 100%;
+      display: block;
+      margin: 0 0 10px 0;
+      padding: 7px 8px;
+      border-radius: 6px;
+      border: 1px solid #556;
+      background: #1a2b3c;
+      color: white;
+      outline: none;
+      box-sizing: border-box;
+    }
+
+    .modal select { cursor: pointer; }
+
+    .modal-right-title {
+      font-weight: bold;
+      font-size: 14px;
+      margin: 10px 0 10px 0;
+      opacity: 0.95;
+    }
+
     .modal-checkboxes {
-      display: flex;
-      justify-content: space-between; /* linke + rechte Spalte */
-      margin: 20px 0;
-    }
-
-    .checkbox-column {
+      width: 100%;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
     }
 
     .right-item {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
       font-size: 14px;
+      line-height: 1.2;
       white-space: nowrap;
     }
 
-    .right-item input {
-      transform: scale(1.2);
+    .right-item input[type="checkbox"] {
+      width: auto;
+      display: inline-block;
+      margin: 0;
+      padding: 0;
+      transform: scale(1.15);
       cursor: pointer;
+      accent-color: #00cfe8;
+    }
+
+    .modal-buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .btn-cancel, .btn-save {
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      color: white;
+      font-size: 14px;
+    }
+
+    .btn-cancel { background: #ea5455; }
+    .btn-save { background: #28c76f; }
+
+    .btn-save:disabled, .btn-cancel:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
+    @media (max-width: 820px) {
+      .modal-grid { grid-template-columns: 1fr; }
+      .modal-right-title { margin-top: 18px; }
+      .right-item { white-space: normal; }
     }
   </style>
 </head>
+
 <body>
   <h1>Benutzer Management</h1>
+
   <div class="toolbar">
-    <button class="btn-create">Benutzer erstellen</button>
-    <button class="btn-refresh" onclick="renderUsers()">Aktualieren</button>
+    <button class="btn-create" id="btnCreate">Benutzer erstellen</button>
+    <button class="btn-refresh" id="btnRefresh">Aktualisieren</button>
   </div>
 
   <table>
@@ -205,13 +255,60 @@
     </thead>
     <tbody id="user-table"></tbody>
   </table>
+
   <div class="footer" id="user-count"></div>
 
+  <!-- Modal -->
+  <div id="editModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header" id="modalTitle">Benutzer bearbeiten</div>
+
+      <div class="modal-body">
+        <div class="image-row">
+          <img id="modal-profil-image" class="modal-image" alt="Profilbild" />
+          <button id="btnChangeImage" class="btn-change-image">Bild ändern</button>
+          <input id="imageFile" type="file" accept="image/*" style="display:none">
+        </div>
+        <div id="uploadStatus"></div>
+
+        <div class="modal-grid">
+          <div class="modal-left">
+            <label>Benutzername</label>
+            <input type="text" id="edit-username" />
+
+            <label id="labelPinAlt">aktueller PIN</label>
+            <input type="text" id="edit-pin" />
+
+            <label>neuer PIN</label>
+            <input type="text" id="edit-neu-pin-1" />
+
+            <label>PIN wiederholung</label>
+            <input type="text" id="edit-neu-pin-2" />
+
+            <label>Rolle</label>
+            <select id="edit-role"></select>
+          </div>
+
+          <div class="modal-right">
+            <div class="modal-right-title">Rechte</div>
+            <div class="modal-checkboxes" id="rechte-container"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-buttons">
+        <button class="btn-cancel" id="btnCancel">Abbrechen</button>
+        <button class="btn-save" id="btnSave">Speichern</button>
+      </div>
+    </div>
+  </div>
+
   <script>
-    const users = [
-      { username: "Admin", PIN: "1111", active: true, role: "Admin", anzahl_rechte: "8", image: "web/pictures/Profile/profil_Admin.png", rechte: [true,true,true,true,true,true,true,true]},
-      { username: "Mike Aussendorf", PIN: "0409", active: false, role: "Benutzer", anzahl_rechte: "5", image:"web/pictures/Profile/profil_Mike_Aussendorf.jpg", rechte: [true,false,true,false,true,false,false,false]}
-    ];
+    const DATA_DIR = "user";
+
+    // Bild-Verkleinerung (gespeichert wird das verkleinerte JPEG)
+    const IMG_MAX_SIZE = 256;    // 256x256
+    const IMG_JPEG_QUALITY = 0.8;
 
     const rechteTexte = [
       "Rezepte",
@@ -221,150 +318,636 @@
       "System",
       "WiFi",
       "Kanäle verwalten",
-      "Benutzer verwalten"
+      "Benutzer verwalten",
+      "Recht 9",
+      "Recht 10",
     ];
+
+    let users = [];
+    let roles = [];
+    let currentUser = null;
+    let isBusy = false;
 
     const userTable = document.getElementById("user-table");
     const userCount = document.getElementById("user-count");
-    let currentUser = null;
+    const uploadStatus = document.getElementById("uploadStatus");
 
-    function renderUsers() {
+    function escapeHtml(s)
+    {
+      return String(s ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function setBusy(busy, msg = "")
+    {
+      isBusy = !!busy;
+      document.getElementById("btnSave").disabled = isBusy;
+      document.getElementById("btnCancel").disabled = isBusy;
+      document.getElementById("btnCreate").disabled = isBusy;
+      document.getElementById("btnRefresh").disabled = isBusy;
+      document.getElementById("btnChangeImage").disabled = isBusy;
+      uploadStatus.textContent = msg || "";
+    }
+
+    function sanitizeBaseName(name)
+    {
+      return String(name || "unknown")
+        .trim()
+        .replaceAll("..", "_")
+        .replaceAll("/", "_")
+        .replaceAll("\\", "_")
+        .replaceAll(" ", "_");
+    }
+
+    function safeImgUrl(url, v)
+    {
+      if (!url) return "";
+      if (url.startsWith("data:")) return url;
+      const enc = encodeURI(url);
+      return v ? (enc + "?v=" + v) : enc;
+    }
+
+    function roleIndexToName(roleIndex)
+    {
+      const r = roles[roleIndex - 1];
+      return r ? r.name : "Unbekannt";
+    }
+
+    function roleIndexToRights(roleIndex)
+    {
+      const r = roles[roleIndex - 1];
+      if (!r) return new Array(rechteTexte.length).fill(false);
+      const out = [];
+      for (let i = 1; i <= rechteTexte.length; i++) out.push(!!r["r" + i]);
+      return out;
+    }
+
+    function countRights(arr)
+    {
+      return (arr || []).filter(Boolean).length;
+    }
+
+    function genId()
+    {
+      return "U" + Date.now().toString(16).toUpperCase();
+    }
+
+    function getNextNr()
+    {
+      const maxNr = users.reduce((m, u) => Math.max(m, Number(u.nr || 0)), 0);
+      return maxNr + 1;
+    }
+
+    function normalizeUsers()
+    {
+      const used = new Set();
+      users.forEach(u => {
+        let n = Number(u.nr || 0);
+        if (!n || used.has(n)) n = getNextNr();
+        u.nr = n;
+        used.add(n);
+
+        if (!u.id) u.id = genId();
+
+        if (!Array.isArray(u.rights) || u.rights.length !== rechteTexte.length)
+        {
+          u.rights = roleIndexToRights(u.roleIndex || 1);
+        }
+        u.anzahl_rechte = countRights(u.rights);
+      });
+      users.sort((a,b) => Number(a.nr) - Number(b.nr));
+    }
+
+    function getUserImage(user)
+    {
+      if (user.pictureDataUrl) return user.pictureDataUrl;
+      return safeImgUrl(user.picture || "", user.__imgv);
+    }
+
+    async function resizeToSquareJpeg(file, size, quality)
+    {
+      const img = await new Promise((resolve, reject) => {
+        const i = new Image();
+        i.onload = () => resolve(i);
+        i.onerror = () => reject(new Error("Bild konnte nicht geladen werden"));
+        i.src = URL.createObjectURL(file);
+      });
+
+      const canvas = document.createElement("canvas");
+      canvas.width = size;
+      canvas.height = size;
+
+      const ctx = canvas.getContext("2d");
+
+      const sw = img.width;
+      const sh = img.height;
+      const s = Math.min(sw, sh);
+      const sx = Math.floor((sw - s) / 2);
+      const sy = Math.floor((sh - s) / 2);
+
+      ctx.drawImage(img, sx, sy, s, s, 0, 0, size, size);
+
+      const blob = await new Promise((resolve) => {
+        canvas.toBlob(resolve, "image/jpeg", quality);
+      });
+
+      URL.revokeObjectURL(img.src);
+      if (!blob) throw new Error("Konnte Bild nicht komprimieren");
+      return blob;
+    }
+
+    function blobToDataUrl(blob)
+    {
+      return new Promise((resolve, reject) => {
+        const r = new FileReader();
+        r.onload = () => resolve(r.result);
+        r.onerror = () => reject(new Error("Vorschau fehlgeschlagen"));
+        r.readAsDataURL(blob);
+      });
+    }
+
+    async function loadDataFromServer()
+    {
+      const usersPath = `${DATA_DIR}/users.json`;
+      const rolesPath = `${DATA_DIR}/rols.json`;
+
+      const [uRes, rRes] = await Promise.all([
+        fetch(usersPath, { cache: "no-store" }),
+        fetch(rolesPath, { cache: "no-store" }),
+      ]);
+
+      if (!uRes.ok) throw new Error(`users.json laden fehlgeschlagen (${uRes.status})`);
+      if (!rRes.ok) throw new Error(`rols.json laden fehlgeschlagen (${rRes.status})`);
+
+      const uJson = await uRes.json();
+      const rJson = await rRes.json();
+
+      roles = rJson.roles || [];
+
+      users = (uJson.user || []).map(u => {
+        const roleIndex = Number(u.role ?? 1);
+
+        let rights = Array.isArray(u.rights) ? u.rights.map(Boolean) : roleIndexToRights(roleIndex);
+        if (rights.length !== rechteTexte.length) rights = roleIndexToRights(roleIndex);
+
+        return {
+          nr: u.nr ?? null,
+          username: u.name ?? "",
+          id: u.id ?? "",
+          PIN: String(u.pin ?? ""),
+          roleIndex,
+          picture: u.picture ?? "",
+          pictureDataUrl: null,
+
+          pendingImageBlob: null,
+          __imgv: 0,
+
+          rights,
+          anzahl_rechte: countRights(rights),
+          active: true
+        };
+      });
+
+      normalizeUsers();
+    }
+
+    async function saveUsersToServer()
+    {
+      normalizeUsers();
+
+      const out = {
+        user: users.map(u => ({
+          nr: Number(u.nr),
+          name: String(u.username ?? ""),
+          id: String(u.id ?? ""),
+          pin: String(u.PIN ?? ""),
+          role: Number(u.roleIndex ?? 1),
+          picture: String(u.picture ?? ""),
+          rights: Array.isArray(u.rights) ? u.rights.map(v => !!v) : roleIndexToRights(Number(u.roleIndex ?? 1))
+        }))
+      };
+
+      const jsonStr = JSON.stringify(out, null, 4);
+      const body = "body=" + encodeURIComponent(jsonStr);
+
+      const res = await fetch(`${DATA_DIR}/users.json`, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body
+      });
+
+      if (!res.ok)
+      {
+        const t = await res.text().catch(() => "");
+        throw new Error(`Speichern fehlgeschlagen (${res.status}): ${t}`);
+      }
+    }
+
+    async function refreshFromJson()
+    {
+      setBusy(true, "Lade Daten…");
+      try
+      {
+        await loadDataFromServer();
+        renderUsers();
+      }
+      catch (e)
+      {
+        alert("Aktualisieren fehlgeschlagen:\n" + (e?.message || e));
+      }
+      finally
+      {
+        setBusy(false);
+      }
+    }
+
+    async function uploadProfileImageIfNeeded(user)
+    {
+      if (!user?.pendingImageBlob) return;
+
+      const base = "profil_" + sanitizeBaseName(user.id || user.username || "unknown");
+      const fd = new FormData();
+      fd.append("file", user.pendingImageBlob, base + ".jpg");
+
+      await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", `/user/uploadProfileImage?base=${encodeURIComponent(base)}`, true);
+        xhr.timeout = 120000;
+
+        xhr.upload.onprogress = (e) => {
+          if (!e.lengthComputable) {
+            uploadStatus.textContent = "Bild wird hochgeladen…";
+            return;
+          }
+          const pct = Math.round((e.loaded / e.total) * 100);
+          uploadStatus.textContent = `Bild Upload: ${pct}%`;
+        };
+
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) resolve();
+          else reject(new Error(`Bild-Upload fehlgeschlagen (${xhr.status}): ${xhr.responseText || ""}`));
+        };
+        xhr.onerror = () => reject(new Error("Bild-Upload Netzwerkfehler"));
+        xhr.ontimeout = () => reject(new Error("Bild-Upload Timeout (120s)"));
+
+        xhr.send(fd);
+      });
+
+      user.picture = `/web/pictures/Profile/${base}.jpg`;
+      user.__imgv = Date.now();
+      user.pendingImageBlob = null;
+      user.pictureDataUrl = null;
+      uploadStatus.textContent = "Bild gespeichert.";
+    }
+
+    function renderUsers()
+    {
       userTable.innerHTML = "";
+
       users.forEach((user, index) => {
+        const roleName = roleIndexToName(user.roleIndex);
+        const img = getUserImage(user);
+
         const tr = document.createElement("tr");
         tr.innerHTML = `
-          <td><img src="${user.image}" style="width:80px; height:80px; border-radius:50%; object-fit:cover;" alt="Profilbild"></td>
-          <td>${user.username}</td>
-          <td>${user.active ? '<i class="fa-solid fa-check-circle active-icon"></i>' : ''}</td>
-          <td>${user.role}</td>
-          <td>${user.anzahl_rechte}/8</td>
+          <td>
+            <img src="${escapeHtml(img)}" style="width:80px; height:80px; border-radius:50%; object-fit:cover; background:#1a2b3c;" alt="Profilbild">
+          </td>
+          <td>${escapeHtml(user.username)}</td>
+          <td>${user.active ? '<span class="active-icon">✔</span>' : ""}</td>
+          <td>${escapeHtml(roleName)}</td>
+          <td>${user.anzahl_rechte}/${rechteTexte.length}</td>
           <td class="actions">
-            <i class="fa-solid fa-pen edit" data-index="${index}"></i>
-            ${user.role !== "Admin" ? '<i class="fa-solid fa-trash delete"></i>' : ''}
+            <button class="edit" data-index="${index}"
+              style="background:#00cfe8;border:none;border-radius:6px;padding:6px 10px;color:white;cursor:pointer;">
+              Bearbeiten
+            </button>
+            ${roleName !== "Admin" ? `
+              <button class="delete" data-index="${index}"
+                style="background:#ea5455;border:none;border-radius:6px;padding:6px 10px;color:white;cursor:pointer;">
+                Löschen
+              </button>` : ""}
           </td>
         `;
         userTable.appendChild(tr);
       });
 
-      document.querySelectorAll(".edit").forEach(icon => {
-        icon.addEventListener("click", function () {
-          const idx = this.getAttribute("data-index");
-          openModal(users[idx]);
+      document.querySelectorAll(".edit").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const idx = Number(btn.getAttribute("data-index"));
+          openModal(users[idx], { isNew: false });
+        });
+      });
+
+      document.querySelectorAll(".delete").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const idx = Number(btn.getAttribute("data-index"));
+          const u = users[idx];
+          if (!u) return;
+
+          if (!confirm(`User "${u.username}" wirklich löschen?`)) return;
+
+          setBusy(true, "Speichere…");
+          try
+          {
+            users.splice(idx, 1);
+            normalizeUsers();
+            await saveUsersToServer();
+            renderUsers();
+          }
+          catch (e)
+          {
+            alert("Löschen/Speichern fehlgeschlagen:\n" + (e?.message || e));
+            await refreshFromJson().catch(() => {});
+          }
+          finally
+          {
+            setBusy(false);
+          }
         });
       });
 
       userCount.textContent = `${users.length} user(s) in total`;
     }
 
-    function openModal(user) {
-      currentUser = user;
-      document.getElementById("modal-profil-image").src = user.image;
-      document.getElementById("edit-username").value = user.username;
-      document.getElementById("edit-role").value = user.role;
-
+    function renderRights(rightsArr)
+    {
       const container = document.getElementById("rechte-container");
       container.innerHTML = "";
-      const colLeft = document.createElement("div");
-      colLeft.className = "checkbox-column";
-      const colRight = document.createElement("div");
-      colRight.className = "checkbox-column";
 
       rechteTexte.forEach((text, i) => {
         const label = document.createElement("label");
         label.className = "right-item";
-        label.innerHTML = `<input type="checkbox" id="recht-${i+1}"> ${text}`;
-        if (user.rechte[i]) label.querySelector("input").checked = true;
-        if (i < 4) {
-          colLeft.appendChild(label);
-        } else {
-          colRight.appendChild(label);
-        }
-      });
+        label.innerHTML = `<input type="checkbox" id="recht-${i+1}"><span>${escapeHtml(text)}</span>`;
 
-      container.appendChild(colLeft);
-      container.appendChild(colRight);
+        const cb = label.querySelector("input");
+        cb.checked = !!rightsArr[i];
+
+        cb.addEventListener("change", () => {
+          if (!currentUser) return;
+
+          const newRights = rechteTexte.map((_, idx) => {
+            const el = document.getElementById("recht-" + (idx + 1));
+            return !!el?.checked;
+          });
+
+          currentUser.rights = newRights;
+          currentUser.anzahl_rechte = countRights(newRights);
+        });
+
+        container.appendChild(label);
+      });
+    }
+
+    function fillRoleSelect(selectedIndex)
+    {
+      const sel = document.getElementById("edit-role");
+      sel.innerHTML = "";
+      roles.forEach((r, i) => {
+        const opt = document.createElement("option");
+        opt.value = String(i + 1);
+        opt.textContent = r.name;
+        sel.appendChild(opt);
+      });
+      sel.value = String(selectedIndex);
+    }
+
+    function openModal(user, { isNew })
+    {
+      currentUser = user;
+      currentUser.__isNew = !!isNew;
+
+      uploadStatus.textContent = "";
+
+      document.getElementById("modalTitle").textContent = isNew ? "Benutzer erstellen" : "Benutzer bearbeiten";
+      document.getElementById("labelPinAlt").textContent = isNew ? "aktueller PIN (bei neuem User nicht nötig)" : "aktueller PIN";
+
+      document.getElementById("modal-profil-image").src = getUserImage(user) || "";
+
+      document.getElementById("edit-username").value = user.username || "";
+      document.getElementById("edit-pin").value = "";
+      document.getElementById("edit-neu-pin-1").value = "";
+      document.getElementById("edit-neu-pin-2").value = "";
+
+      fillRoleSelect(user.roleIndex);
+
+      const showRights = Array.isArray(user.rights) ? [...user.rights] : roleIndexToRights(user.roleIndex);
+      user.rights = showRights;
+      user.anzahl_rechte = countRights(showRights);
+      renderRights(showRights);
+
+      const sel = document.getElementById("edit-role");
+      sel.onchange = () => {
+        const newRoleIndex = Number(sel.value);
+        currentUser.roleIndex = newRoleIndex;
+
+        const preset = roleIndexToRights(newRoleIndex);
+        currentUser.rights = preset;
+        currentUser.anzahl_rechte = countRights(preset);
+        renderRights(preset);
+      };
 
       document.getElementById("editModal").style.display = "block";
     }
 
-    function closeModal() {
+    function closeModal()
+    {
       document.getElementById("editModal").style.display = "none";
       currentUser = null;
+      uploadStatus.textContent = "";
     }
 
-    function saveUser() {
-      var gespeierter_pin = currentUser.PIN;
-      var input_pin = document.getElementById("edit-pin").value;
-      var neu_pin1 = document.getElementById("edit-neu-pin-1").value;
-      var neu_pin2 = document.getElementById("edit-neu-pin-2").value;
-      
-      if(neu_pin1 == neu_pin2 && gespeierter_pin == input_pin) {
-        if (currentUser) {
-          currentUser.username = document.getElementById("edit-username").value;
-          currentUser.role = document.getElementById("edit-role").value;
-          currentUser.PIN = document.getElementById("edit-neu-pin-1").value;
-          
-          let neueRechte = [];
-          rechteTexte.forEach((_, i) => {
-            neueRechte.push(document.getElementById("recht-" + (i+1)).checked);
-          });
-          currentUser.rechte = neueRechte;
-          currentUser.anzahl_rechte = neueRechte.filter(r => r).length;
+    async function saveUser()
+    {
+      if (!currentUser || isBusy) return;
+
+      const isNew = !!currentUser.__isNew;
+
+      const newName = document.getElementById("edit-username").value.trim();
+      if (!newName)
+      {
+        alert("Bitte Benutzername eingeben.");
+        return;
+      }
+      currentUser.username = newName;
+
+      currentUser.roleIndex = Number(document.getElementById("edit-role").value);
+
+      const gespeicherterPin = String(currentUser.PIN ?? "");
+      const inputPin = document.getElementById("edit-pin").value.trim();
+      const neuPin1 = document.getElementById("edit-neu-pin-1").value.trim();
+      const neuPin2 = document.getElementById("edit-neu-pin-2").value.trim();
+
+      if (neuPin1 || neuPin2)
+      {
+        if (neuPin1 !== neuPin2)
+        {
+          alert("Neuer PIN und Wiederholung stimmen nicht überein."); return;
+        }
+        if (!neuPin1)
+        {
+          alert("Neuer PIN darf nicht leer sein."); return;
+        }
+        if (!isNew && inputPin !== gespeicherterPin)
+        {
+          alert("Aktueller PIN ist falsch."); return;
+        }
+        currentUser.PIN = neuPin1;
+      }
+      else
+      {
+        if (isNew && !gespeicherterPin)
+        {
+          alert("Bitte einen PIN setzen (Neuer PIN + Wiederholung)."); return;
+        }
+      }
+
+      setBusy(true, "Speichere…");
+      try
+      {
+        if (isNew)
+        {
+          delete currentUser.__isNew;
+
+          if (!currentUser.id) currentUser.id = genId();
+          if (currentUser.nr == null) currentUser.nr = getNextNr();
+
+          if (!Array.isArray(currentUser.rights) || currentUser.rights.length !== rechteTexte.length)
+          {
+            currentUser.rights = roleIndexToRights(currentUser.roleIndex);
+          }
+
+          users.push(currentUser);
+        }
+        else
+        {
+          delete currentUser.__isNew;
+        }
+
+        await uploadProfileImageIfNeeded(currentUser);
+
+        normalizeUsers();
+        await saveUsersToServer();
+
+        renderUsers();
+        closeModal();
+      }
+      catch (e)
+      {
+        alert("Speichern fehlgeschlagen:\n" + (e?.message || e));
+        await refreshFromJson().catch(() => {});
+      }
+      finally
+      {
+        setBusy(false);
+      }
+    }
+
+    function createUser()
+    {
+      const defaultRole = 1;
+      const preset = roleIndexToRights(defaultRole);
+
+      const draftUser = {
+        nr: null,
+        username: "Neuer Benutzer",
+        id: "",
+        PIN: "",
+        roleIndex: defaultRole,
+        picture: "",
+        pictureDataUrl: null,
+
+        pendingImageBlob: null,
+        __imgv: 0,
+
+        rights: preset,
+        anzahl_rechte: countRights(preset),
+
+        active: true
+      };
+
+      openModal(draftUser, { isNew: true });
+    }
+
+    function setupImageChange()
+    {
+      const btn = document.getElementById("btnChangeImage");
+      const fileInput = document.getElementById("imageFile");
+
+      btn.addEventListener("click", () => fileInput.click());
+
+      fileInput.addEventListener("change", async () => {
+        const file = fileInput.files && fileInput.files[0];
+        if (!file) return;
+
+        if (!file.type.startsWith("image/"))
+        {
+          alert("Bitte ein Bild auswählen.");
+          fileInput.value = "";
+          return;
+        }
+
+        if (!currentUser) return;
+
+        try
+        {
+          setBusy(true, "Bild wird verkleinert…");
+          const blob = await resizeToSquareJpeg(file, IMG_MAX_SIZE, IMG_JPEG_QUALITY);
+          const previewUrl = await blobToDataUrl(blob);
+
+          currentUser.pendingImageBlob = blob;
+          currentUser.pictureDataUrl = previewUrl;
+
+          document.getElementById("modal-profil-image").src = previewUrl;
+          uploadStatus.textContent = `Bild vorbereitet (${Math.round(blob.size / 1024)} KB).\nBeim Speichern wird es hochgeladen.`;
 
           renderUsers();
         }
-        closeModal();
-      } else {
-        console.log("Falscher PIN");
-      }
+        catch (e)
+        {
+          alert("Bild konnte nicht verarbeitet werden:\n" + (e?.message || e));
+        }
+        finally
+        {
+          setBusy(false);
+        }
+
+        fileInput.value = "";
+      });
     }
 
-    window.onclick = function(event) {
+    window.onclick = (event) => {
       const modal = document.getElementById("editModal");
-      if (event.target === modal) {
-        closeModal();
-      }
+      if (event.target === modal) closeModal();
     };
 
-    renderUsers();
+    document.getElementById("btnCancel").addEventListener("click", closeModal);
+    document.getElementById("btnSave").addEventListener("click", saveUser);
+    document.getElementById("btnCreate").addEventListener("click", createUser);
+    document.getElementById("btnRefresh").addEventListener("click", refreshFromJson);
+
+    (async function init()
+    {
+      setBusy(true, "Lade Daten…");
+      try
+      {
+        await loadDataFromServer();
+        setupImageChange();
+        renderUsers();
+      }
+      catch (e)
+      {
+        alert("Start fehlgeschlagen:\n" + (e?.message || e));
+      }
+      finally
+      {
+        setBusy(false);
+      }
+    })();
   </script>
-
-  <!-- Popup Modal -->
-  <div id="editModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">Benutzer bearbeiten</div>
-      
-      <img id="modal-profil-image" class="modal-image" alt="Profilbild">
-      <button class="btn-change-image" onclick="alert('Bild ändern!')">Bild ändern</button>
-
-      <label>Benutzername</label>
-      <input type="text" id="edit-username">
-
-      <label>aktueller PIN</label>
-      <input type="text" id="edit-pin">
-
-      <label>neuer PIN</label>
-      <input type="text" id="edit-neu-pin-1">
-
-      <label>PIN wiederholung</label>
-      <input type="text" id="edit-neu-pin-2">
-
-      <label>Rolle</label>
-      <select id="edit-role">
-        <option value="Admin">Admin</option>
-        <option value="Chef 1">Chef 1</option>
-        <option value="Chef 2">Chef 2</option>
-        <option value="Benutzer">Benutzer</option>
-      </select>
-
-      <!-- Rechte -->
-      <div class="modal-checkboxes" id="rechte-container"></div>
-
-      <div class="modal-buttons">
-        <button class="btn-cancel" onclick="closeModal()">Abbrechen</button>
-        <button class="btn-save" onclick="saveUser()">Speichern</button>
-      </div>
-    </div>
-  </div>
 </body>
 </html>
