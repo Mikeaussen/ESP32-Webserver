@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Webbrowser Konfiguration</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#1a2b3c; color:#fff; margin:20px; }
+    .card { max-width: 760px; background:#2c3e50; border-radius:14px; padding:22px; box-shadow:0 8px 24px rgba(0,0,0,.25); }
+    h1 { margin-top:0; }
+    .profiles { display:grid; gap:14px; margin:20px 0; }
+    .profile { border:1px solid #456; border-radius:10px; padding:16px; background:#223548; }
+    .profile.active { border-color:#28c76f; box-shadow:0 0 0 1px #28c76f inset; }
+    .headline { display:flex; justify-content:space-between; align-items:center; gap:12px; }
+    .badge { background:#28c76f; color:#fff; border-radius:999px; padding:4px 10px; font-size:12px; }
+    .paths { margin-top:10px; font-family:monospace; color:#d8e6f2; line-height:1.7; }
+    button { border:none; border-radius:8px; padding:10px 14px; cursor:pointer; color:#fff; background:#00cfe8; }
+    button:hover { background:#0aa7bc; }
+    button:disabled { opacity:.6; cursor:not-allowed; }
+    .hint { color:#c7d4df; }
+    .status { min-height:22px; color:#8fe3a8; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Webbrowser-Konfiguration</h1>
+    <p class="hint">Hier wird ausgewählt, aus welchem Dateipfad Rezepte und Produkte geladen werden. Nach einem Neustart bleibt das gewählte Profil aktiv.</p>
+    <div id="status" class="status"></div>
+    <div id="profiles" class="profiles"></div>
+  </div>
+
+  <script>
+    async function ladeConfig() {
+      const res = await fetch('/api/webbrowser/config', { cache: 'no-store' });
+      if (!res.ok) throw new Error('Konfiguration konnte nicht geladen werden');
+      return await res.json();
+    }
+
+    async function setzeProfil(profileId) {
+      const status = document.getElementById('status');
+      status.textContent = 'Speichere Profil ' + profileId + ' ...';
+
+      const body = new URLSearchParams();
+      body.set('profile', profileId);
+
+      const res = await fetch('/api/webbrowser/config', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: body.toString()
+      });
+
+      if (!res.ok) {
+        const txt = await res.text();
+        throw new Error(txt || 'Profil konnte nicht gespeichert werden');
+      }
+
+      const data = await res.json();
+      status.textContent = 'Profil gespeichert: ' + data.activeProfile + '. Nach Neustart bootet die Maschine mit dieser Konfiguration.';
+      render(data);
+    }
+
+    function render(data) {
+      const host = document.getElementById('profiles');
+      host.innerHTML = '';
+
+      (data.profiles || []).forEach(profile => {
+        const div = document.createElement('div');
+        const isActive = profile.id === data.activeProfile;
+        div.className = 'profile' + (isActive ? ' active' : '');
+        div.innerHTML = `
+          <div class="headline">
+            <strong>${profile.id}</strong>
+            ${isActive ? '<span class="badge">aktiv</span>' : ''}
+          </div>
+          <div class="paths">
+            Rezepte: ${profile.recipePath}<br>
+            Produkte: ${profile.productPath}
+          </div>
+          <div style="margin-top:14px;">
+            <button ${isActive ? 'disabled' : ''} onclick="setzeProfil('${profile.id}')">Dieses Profil aktivieren</button>
+          </div>
+        `;
+        host.appendChild(div);
+      });
+    }
+
+    (async () => {
+      try {
+        const data = await ladeConfig();
+        render(data);
+      } catch (err) {
+        document.getElementById('status').textContent = 'Fehler: ' + err.message;
+      }
+    })();
+  </script>
+</body>
+</html>
