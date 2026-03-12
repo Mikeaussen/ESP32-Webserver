@@ -166,6 +166,11 @@ void setup()
   Serial.println("Configuring Webserver ...");
   configureWebServer();
 
+  WebProfileConfig activeProfile = getActiveWebProfileConfig();
+  Serial.println("Aktive Webbrowser-Konfiguration nach Boot: " + activeProfile.id);
+  Serial.println("  Rezepte  : " + activeProfile.rezeptPath);
+  Serial.println("  Produkte : " + activeProfile.productPath);
+
 //   // startup web server
 //   Serial.println("Starting Webserver ...");
 
