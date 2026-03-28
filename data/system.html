@@ -3,40 +3,334 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Webbrowser Konfiguration</title>
+  <title>Einstellungen</title>
   <style>
-    body { font-family: Arial, sans-serif; background:#1a2b3c; color:#fff; margin:20px; }
-    .card { max-width: 760px; background:#2c3e50; border-radius:14px; padding:22px; box-shadow:0 8px 24px rgba(0,0,0,.25); }
-    h1 { margin-top:0; }
-    .profiles { display:grid; gap:14px; margin:20px 0; }
-    .profile { border:1px solid #456; border-radius:10px; padding:16px; background:#223548; }
-    .profile.active { border-color:#28c76f; box-shadow:0 0 0 1px #28c76f inset; }
-    .headline { display:flex; justify-content:space-between; align-items:center; gap:12px; }
-    .badge { background:#28c76f; color:#fff; border-radius:999px; padding:4px 10px; font-size:12px; }
-    .paths { margin-top:10px; font-family:monospace; color:#d8e6f2; line-height:1.7; }
-    button { border:none; border-radius:8px; padding:10px 14px; cursor:pointer; color:#fff; background:#00cfe8; }
-    button:hover { background:#0aa7bc; }
-    button:disabled { opacity:.6; cursor:not-allowed; }
-    .hint { color:#c7d4df; }
-    .status { min-height:22px; color:#8fe3a8; }
+    :root {
+      --bg: #162535;
+      --panel: #26384a;
+      --panel-2: #223548;
+      --panel-3: #1d2f40;
+      --border: #415a70;
+      --border-soft: rgba(255,255,255,.08);
+      --text: #ffffff;
+      --muted: #c7d4df;
+      --accent: #00cfe8;
+      --accent-2: #28c76f;
+      --shadow: 0 12px 30px rgba(0,0,0,.25);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background:
+        radial-gradient(900px 500px at 15% -10%, rgba(0,207,232,0.25), transparent 60%),
+        radial-gradient(700px 400px at 85% 10%, rgba(0,207,232,0.10), transparent 60%),
+        linear-gradient(180deg, #081426 0%, #0b1a2d 60%, #091624 100%);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .shell {
+      max-width: 1180px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .sidebar,
+    .content {
+      background: var(--panel);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .sidebar {
+      padding: 18px;
+      position: sticky;
+      top: 20px;
+    }
+
+    .sidebar h1 {
+      font-size: 20px;
+      margin: 0 0 18px;
+    }
+
+    .search {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--panel-2);
+      color: var(--text);
+      margin-bottom: 18px;
+      outline: none;
+    }
+
+    .search::placeholder { color: #97afc3; }
+
+    .nav {
+      display: grid;
+      gap: 6px;
+    }
+
+    .nav button {
+      width: 100%;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--muted);
+      border-radius: 10px;
+      padding: 12px 14px;
+      text-align: left;
+      font-size: 16px;
+      cursor: pointer;
+      transition: .18s ease;
+    }
+
+    .nav button:hover {
+      background: rgba(255,255,255,.04);
+      color: var(--text);
+    }
+
+    .nav button.active {
+      background: rgba(255,255,255,.08);
+      color: var(--text);
+      border-color: var(--border-soft);
+    }
+
+    .content {
+      padding: 22px;
+      min-height: 760px;
+    }
+
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    .page-header {
+      margin-bottom: 22px;
+    }
+
+    .page-header h2 {
+      margin: 0 0 8px;
+      font-size: 22px;
+    }
+
+    .hint {
+      color: var(--muted);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    .status {
+      min-height: 22px;
+      color: #8fe3a8;
+      margin-bottom: 14px;
+    }
+
+    .placeholder,
+    .section-card {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+
+    .placeholder h3,
+    .section-card h3 {
+      margin: 0 0 8px;
+      font-size: 18px;
+    }
+
+    .placeholder p,
+    .section-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .profiles {
+      display: grid;
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .profile {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      background: var(--panel-2);
+    }
+
+    .profile.active {
+      border-color: var(--accent-2);
+      box-shadow: 0 0 0 1px var(--accent-2) inset;
+    }
+
+    .headline {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .headline strong {
+      font-size: 18px;
+    }
+
+    .badge {
+      background: var(--accent-2);
+      color: #fff;
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .paths {
+      margin-top: 10px;
+      font-family: Consolas, Monaco, monospace;
+      color: #d8e6f2;
+      line-height: 1.8;
+    }
+
+    button.primary {
+      border: none;
+      border-radius: 8px;
+      padding: 10px 14px;
+      cursor: pointer;
+      color: #fff;
+      background: var(--accent);
+      transition: .18s ease;
+    }
+
+    button.primary:hover { background: #0aa7bc; }
+    button.primary:disabled { opacity: .6; cursor: not-allowed; }
+
+    .option-list {
+      display: grid;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .option {
+      padding: 14px 16px;
+      border-radius: 12px;
+      background: var(--panel-3);
+      border: 1px solid var(--border-soft);
+    }
+
+    .option strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    @media (max-width: 900px) {
+      .shell {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: static;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>Webbrowser-Konfiguration</h1>
-    <p class="hint">Hier wird ausgewählt, aus welchem Dateipfad Rezepte und Produkte geladen werden. Nach einem Neustart bleibt das gewählte Profil aktiv.</p>
-    <div id="status" class="status"></div>
-    <div id="profiles" class="profiles"></div>
+  <div class="shell">
+    <aside class="sidebar">
+      <h1>Einstellungen</h1>
+      <input class="search" type="text" placeholder="In Einstellungen suchen (Strg+F)" aria-label="Suche">
+
+      <nav class="nav" aria-label="Einstellungsbereiche">
+        <button class="nav-item" data-target="allgemein">Allgemein</button>
+        <button class="nav-item" data-target="darstellung">Darstellung</button>
+        <button class="nav-item" data-target="benachrichtigungen">Benachrichtigungen und Aktivitäten</button>
+        <button class="nav-item active" data-target="dateien">Dateien</button>
+        <button class="nav-item" data-target="datenschutz">Datenschutz</button>
+      </nav>
+    </aside>
+
+    <main class="content">
+      <section id="allgemein" class="page">
+        <div class="page-header">
+          <h2>Allgemein</h2>
+          <p class="hint">Hier können später allgemeine Programmeinstellungen angezeigt und bearbeitet werden.</p>
+        </div>
+        <div class="placeholder">
+          <h3>Platzhalter für allgemeine Optionen</h3>
+          <p>Zum Beispiel Sprache, Startverhalten, Standardansichten oder weitere globale Einstellungen.</p>
+        </div>
+      </section>
+
+      <section id="darstellung" class="page">
+        <div class="page-header">
+          <h2>Darstellung</h2>
+          <p class="hint">Dieser Bereich kann für Theme, Farben, Schriftgrößen oder Layout-Optionen genutzt werden.</p>
+        </div>
+        <div class="placeholder">
+          <h3>Platzhalter für Design-Einstellungen</h3>
+          <p>Hier könnte man später zwischen Hell/Dunkel, Akzentfarben oder Dichte des Layouts umschalten.</p>
+        </div>
+      </section>
+
+      <section id="benachrichtigungen" class="page">
+        <div class="page-header">
+          <h2>Benachrichtigungen und Aktivitäten</h2>
+          <p class="hint">Bereich für Hinweise, Popups, Systemmeldungen und Aktivitätsprotokolle.</p>
+        </div>
+        <div class="placeholder">
+          <h3>Platzhalter für Benachrichtigungen</h3>
+          <p>Hier könnten z. B. Desktop-Benachrichtigungen, Ton-Signale oder Aktivitätsübersichten gesteuert werden.</p>
+        </div>
+      </section>
+
+      <section id="dateien" class="page active">
+        <div class="page-header">
+          <h2>Dateien</h2>
+          <p class="hint">Hier wird ausgewählt, aus welchem Dateipfad Rezepte und Produkte geladen werden. Nach einem Neustart bleibt das gewählte Profil aktiv.</p>
+        </div>
+
+        <div class="section-card">
+          <h3>Webbrowser-Konfiguration</h3>
+          <p>Wähle ein Profil aus, um die aktiven Quellpfade für Rezepte und Produkte festzulegen.</p>
+        </div>
+
+        <div id="status" class="status"></div>
+        <div id="profiles" class="profiles"></div>
+      </section>
+
+      <section id="datenschutz" class="page">
+        <div class="page-header">
+          <h2>Datenschutz</h2>
+          <p class="hint">Optionen für Datenverarbeitung, Protokollierung und Zugriffssteuerung.</p>
+        </div>
+        <div class="placeholder">
+          <h3>Platzhalter für Datenschutz</h3>
+          <p>Hier lassen sich später beispielsweise Telemetrie, Logs oder Berechtigungen konfigurieren.</p>
+        </div>
+      </section>
+    </main>
   </div>
 
   <script>
-    async function ladeConfig() {
+    async function ladeConfig()
+    {
       const res = await fetch('/api/webbrowser/config', { cache: 'no-store' });
       if (!res.ok) throw new Error('Konfiguration konnte nicht geladen werden');
       return await res.json();
     }
 
-    async function setzeProfil(profileId) {
+    async function setzeProfil(profileId)
+    {
       const status = document.getElementById('status');
       status.textContent = 'Speichere Profil ' + profileId + ' ...';
 
@@ -49,17 +343,19 @@
         body: body.toString()
       });
 
-      if (!res.ok) {
+      if (!res.ok)
+      {
         const txt = await res.text();
         throw new Error(txt || 'Profil konnte nicht gespeichert werden');
       }
 
       const data = await res.json();
       status.textContent = 'Profil gespeichert: ' + data.activeProfile + '. Nach Neustart bootet die Maschine mit dieser Konfiguration.';
-      render(data);
+      renderProfiles(data);
     }
 
-    function render(data) {
+    function renderProfiles(data)
+    {
       const host = document.getElementById('profiles');
       host.innerHTML = '';
 
@@ -77,17 +373,32 @@
             Produkte: ${profile.productPath}
           </div>
           <div style="margin-top:14px;">
-            <button ${isActive ? 'disabled' : ''} onclick="setzeProfil('${profile.id}')">Dieses Profil aktivieren</button>
+            <button class="primary" ${isActive ? 'disabled' : ''} onclick="setzeProfil('${profile.id}')">Dieses Profil aktivieren</button>
           </div>
         `;
         host.appendChild(div);
       });
     }
 
+    function activatePage(targetId)
+    {
+      document.querySelectorAll('.page').forEach(page => {
+        page.classList.toggle('active', page.id === targetId);
+      });
+
+      document.querySelectorAll('.nav-item').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.target === targetId);
+      });
+    }
+
+    document.querySelectorAll('.nav-item').forEach(btn => {
+      btn.addEventListener('click', () => activatePage(btn.dataset.target));
+    });
+
     (async () => {
       try {
         const data = await ladeConfig();
-        render(data);
+        renderProfiles(data);
       } catch (err) {
         document.getElementById('status').textContent = 'Fehler: ' + err.message;
       }
