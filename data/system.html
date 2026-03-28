@@ -7,9 +7,9 @@
   <style>
     :root {
       --bg: #162535;
-      --panel: #26384a;
-      --panel-2: #223548;
-      --panel-3: #1d2f40;
+      --panel: #0f1f35;
+      --panel-2: #0c1a2b;
+      --panel-3: #0a1624;
       --border: #415a70;
       --border-soft: rgba(255,255,255,.08);
       --text: #ffffff;
@@ -91,12 +91,12 @@
     }
 
     .nav button:hover {
-      background: rgba(255,255,255,.04);
+      background: rgba(40,120,255,0.15);
       color: var(--text);
     }
 
     .nav button.active {
-      background: rgba(255,255,255,.08);
+      background: rgba(40,120,255,0.25);
       color: var(--text);
       border-color: var(--border-soft);
     }
@@ -167,12 +167,13 @@
       border: 1px solid var(--border);
       border-radius: 12px;
       padding: 16px;
-      background: var(--panel-2);
+      background: linear-gradient(180deg, #0c1a2b, #091624);
     }
 
     .profile.active {
       border-color: var(--accent-2);
-      box-shadow: 0 0 0 1px var(--accent-2) inset;
+       box-shadow: 0 0 0 1px #28c76f inset,
+              0 0 10px rgba(40,120,255,0.3);
     }
 
     .headline {
@@ -231,6 +232,30 @@
     .option strong {
       display: block;
       margin-bottom: 4px;
+    }
+
+    .topbar {
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding: 18px;
+      margin: -22px -22px 22px -22px;
+
+      background: linear-gradient(
+        90deg,
+        rgba(40,120,255,0.25),
+        rgba(40,120,255,0.08)
+      );
+
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px 16px 0 0;
+    }
+
+    .topbar h2 {
+      margin: 0;
+      font-size: 26px;
+      color: #5bbcff;
+      font-weight: 700;
     }
 
     @media (max-width: 900px) {
@@ -294,10 +319,14 @@
       </section>
 
       <section id="dateien" class="page active">
-        <div class="page-header">
-          <h2>Dateien</h2>
-          <p class="hint">Hier wird ausgewählt, aus welchem Dateipfad Rezepte und Produkte geladen werden. Nach einem Neustart bleibt das gewählte Profil aktiv.</p>
+        <div class="topbar">
+        <h2>Dateien</h2>
         </div>
+
+        <p class="hint">
+          Hier wird ausgewählt, aus welchem Dateipfad Rezepte und Produkte geladen werden.
+          Nach einem Neustart bleibt das gewählte Profil aktiv.
+        </p>
 
         <div class="section-card">
           <h3>Webbrowser-Konfiguration</h3>
