@@ -26,7 +26,7 @@
       background:
         radial-gradient(900px 500px at 15% -10%, rgba(0,207,232,0.25), transparent 60%),
         radial-gradient(700px 400px at 85% 10%, rgba(0,207,232,0.10), transparent 60%),
-        linear-gradient(180deg, #081426 0%, #0b1a2d 60%, #091624 100%);
+        linear-gradient(90deg, #020817 0%, #031022 35%, #07182b 100%);
       color: var(--text);
       min-height: 100vh;
       padding: 20px;
@@ -276,16 +276,16 @@
       <input class="search" type="text" placeholder="In Einstellungen suchen (Strg+F)" aria-label="Suche">
 
       <nav class="nav" aria-label="Einstellungsbereiche">
-        <button class="nav-item" data-target="allgemein">Allgemein</button>
+        <button class="nav-item active" data-target="allgemein">Allgemein</button>
         <button class="nav-item" data-target="darstellung">Darstellung</button>
         <button class="nav-item" data-target="benachrichtigungen">Benachrichtigungen und Aktivitäten</button>
-        <button class="nav-item active" data-target="dateien">Dateien</button>
+        <button class="nav-item" data-target="dateien">Dateien</button>
         <button class="nav-item" data-target="datenschutz">Datenschutz</button>
       </nav>
     </aside>
 
     <main class="content">
-      <section id="allgemein" class="page">
+      <section id="allgemein" class="page active">
         <div class="page-header">
           <h2>Allgemein</h2>
           <p class="hint">Hier können später allgemeine Programmeinstellungen angezeigt und bearbeitet werden.</p>
@@ -318,7 +318,7 @@
         </div>
       </section>
 
-      <section id="dateien" class="page active">
+      <section id="dateien" class="page">
         <div class="topbar">
         <h2>Dateien</h2>
         </div>
